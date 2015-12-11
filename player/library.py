@@ -29,14 +29,18 @@ class Library():
 		self.libpath = LIB_DIR + "library"
 
 		if os.path.exists(self.libpath):
-			# read
-			j_artist = json.load(open(self.libpath))
-			for artist in j_artist:
-				if artist != self.count_str:
-					for album in j_artist[artist]:
-						if album != self.count_str:
-							for track in j_artist[artist][album]:
-								self.put_song(artist, album, track[0], 0, Track(track[1]))
+			try:
+				# read
+				j_artist = json.load(open(self.libpath, encoding="utf-8"))
+				for artist in j_artist:
+					if artist != self.count_str:
+						for album in j_artist[artist]:
+							if album != self.count_str:
+								for track in j_artist[artist][album]:
+									self.put_song(artist, album, track[0], 0, Track(track[1]))
+			except Exception as e:
+				print(e)
+				return False
 			return True
 
 		return False
@@ -107,7 +111,7 @@ class Library():
 							for title in self.lib[artist][album]:
 								if title != self.count_str:
 									if toFile:
-										s += "[\"" + title + "\",\"" + self.lib[artist][album][title].path + "\"],"
+										s += "[\"" + title + "\",\"" + self.lib[artist][album][title].path.replace("\\", "/") + "\"],"
 									else:
 										s += "\"" + title + "\","
 							s = s.rstrip(",")
@@ -124,4 +128,4 @@ class Library():
 		return self.json
 
 	def savelib(self):
-		open(self.libpath, "w").write(self.get_json(toFile=True))
+		open(self.libpath, "w", encoding="utf-8").write(self.get_json(toFile=True))

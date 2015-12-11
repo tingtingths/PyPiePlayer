@@ -45,6 +45,7 @@ class WebInterface(RequestWorker):
 
 			return 200, "/tmp/album_art/" + filename, []
 		if cmd == "stream":
+			self.limitcache(self.streamroot, 4)
 			artist = self.fromHex(req.query["artist"])
 			album = self.fromHex(req.query["album"])
 			title = self.fromHex(req.query["title"])
@@ -72,3 +73,14 @@ class WebInterface(RequestWorker):
 		for song in list(self.lib.get(artist, album).values()):
 			if type(song) is Track:
 				return song
+
+	def limitcache(self, path, maxitems=0):
+		files = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
+		tokeep = []
+
+		for f in files:
+			tokeep.append((f, os.stat(os.path.join(path, f)).st_atime))
+
+		tokeep = sorted(tokeep, key=lambda tup: tup[1], reverse=True)
+		for fname, time in tokeep[maxitems - 1:]:
+			os.remove(os.path.join(path, fname))
