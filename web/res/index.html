@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>PiePlayer</title>
+	<script src="./res/js/randomBG.js"></script>
+	<script src="./res/js/jquery-2.1.3.min.js"></script>
+	<script src="./res/js/jquery.slimscroll.min.js"></script>
+	<script src="./res/js/jquery.fullPage.min.js"></script>
+	<script src="./res/js/howler.min.js"></script>
+	<script src="./res/js/pieplayer.js?verion=1"></script>
+	<link rel="stylesheet" href="./res/pieplayer.css" type="text/css">
+	<link rel="stylesheet" href="./res/jquery.fullPage.css" type="text/css">
+</head>
+<body>
+	<div id="fullpage">
+		<div class="section">
+			<div class="slide" id="section_player">
+				<span id="bkgBottom"></span>
+				<span id="bkgTop"></span>
+				<progress id="progress" onMouseOver="hoverProgressText(this)" max="" value=""></progress>
+				<span id="progressText">
+					<span>
+						<span id="position"></span>
+						<!--<span id="left"></span>-->
+					</span>
+				</span>
+				<div id="menu">
+					<a id="getLyricBtn" onclick="enableLyric()">Lyrics</a>
+					<br>
+					<div id="lyricbox">
+					</div>
+				</div>
+				<div id="playerControl">
+					<div id="artworkWrapper">
+						<img id="artBottom" src="./res/image/dummy.png">
+						<img id="artTop" src="./res/image/dummy.png">
+						<img id="shuffleBtn" onclick="toggleShuffle()" src="./res/image/shuffle.png">
+					</div>
+					<div class="info" id="title"></div>
+					<div class="info" id="artistANDalbum">
+					<span id="artist"></span> - <span id="album"></span>
+					</div>
+					<br>
+					<div id="volumeControl">
+						<input id="volumeSlider" orient="vertical" onInput="setVolume(this.value)" type="range" max="100">
+					</div>
+					<form class="info" id="controlPanel">
+						<img class="controlBtn" onclick="backTrack()" src="./res/image/prevNew.png">
+						<img class="controlBtn" id="playPauseBtn" onclick="playPause()" src="./res/image/playNew.png">
+						<img class="controlBtn" onclick="nextTrack()" src="./res/image/nextNew.png">
+					</form>
+				</div>
+				<div class="myFooter"><span onclick="changeBkg()">PiePlayer by Ting @ 2015</span></div>
+			</div>
+			<div class="slide" id="section_playlist">
+				<div class="list" id="list_1"></div>
+				<div class="list" id="list_2"></div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

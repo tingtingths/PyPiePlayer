@@ -1,0 +1,11 @@
+__pycache__/
+.directory
+*.py[cod]
+*.m4a
+*.mp3
+*.flac
+*.jpg
+*.png
+.idea/
+log
+library

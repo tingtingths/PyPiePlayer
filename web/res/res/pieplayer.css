@@ -1,0 +1,317 @@
+@font-face {
+	font-family: OpenSans-Regular;
+	src: url('./font/OpenSans-Regular.ttf');
+}
+@font-face {
+	font-family: OpenSans-Light;
+	src: url('./font/OpenSans-Light.ttf');
+}
+::-webkit-scrollbar {
+	width: 4px;
+}
+::-webkit-scrollbar-thumb {
+	background-color: #DA6E17;
+}
+body {
+	font-family: OpenSans-Regular, Arial;
+	text-shadow: rgba(0,0,0,.01) 0 0 1px;
+	margin: 0;
+	background-color: #c0dade;
+
+	-webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+#bkgTop, #bkgBottom {
+	width: 50%;
+	height: 100%;
+	background-size: cover;
+	background-position: center center;
+	position: absolute;
+	z-index: -1;
+}
+#bkgTop {
+	transition: opacity 2.0s ease-in-out;
+}
+a {
+	cursor: pointer;
+	cursor: hand;
+	color: rgb(255,120,120);
+	text-decoration: none;
+	transition: color 0.2s ease;
+}
+a:visited {
+	color: rgb(255,120,120);
+}
+a:hover {
+	color: red;
+}
+hr {
+	height: 1px;
+	border-width: 0;
+	background-color: #cccccc;
+}
+progress::-webkit-progress-bar {
+	background-color: rgba(0,0,0,0);
+	opacity: 1.0;
+}
+progress::-webkit-progress-value {
+	background-color: #DA6E17;
+	transition: width 1s linear;
+	opacity: 1.0;
+}
+#progress {
+	top: 0;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	display: table;
+	border: 0;
+	width: 100%;
+	height: 0.2em;
+}
+#progressText {
+	position: absolute;
+	top: 7px;
+	padding: 2px 7px 2px 7px;
+	font-size: 0.8em;
+	text-align: center;
+	color: white;
+	background-color: rgba(0,0,0,0.3);
+	opacity: 0;
+	border-radius: 3px;
+	transition: opacity 1s ease-out, left 1s linear;
+}
+#menu {
+	position: absolute;
+	top: 8%;
+	background-color: rgba(0,0,0,0.3);
+	padding: 10px 0px 10px 10px;
+	z-index: 10;
+}
+#getStreamBtn, #getLyricBtn, #lyricbox {
+	color: white;
+}
+#lyricbox {
+	max-height: 35em;
+	max-width: 350px;
+	font-size: 0.9em;
+	line-height: 200%;
+	text-align: center;
+	overflow-y: scroll;
+}
+#lyricbox::-webkit-scrollbar-thumb {
+	background: transparent;
+}
+#lyricbox:hover::-webkit-scrollbar-thumb {
+	background-color: #DA6E17;
+}
+#localVolumeControl {
+	margin: 5px 0 5px 0;
+}
+#localVolumeSlider:focus {
+	outline: none!important;
+}
+#localVolumeSlider::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	position: relative;
+	top: 0px;
+	z-index: 1;
+	width: 13px;
+	height: 13px;
+	cursor: pointer;
+	-webkit-border-radius: 50%;
+	-moz-border-radius: 50%;
+	border-radius: 50%;
+	background-color: white;
+	border-color: red;
+	border-width: 1px;
+	border-style: solid;
+}
+#playerControl {
+	position: relative;
+	text-align: center;
+	top: 20%;
+}
+#artworkWrapper {
+	position: relative;
+	width: 200px;
+	height: 200px;
+	margin: auto;
+	margin-bottom: 30px;
+	padding: 0;
+}
+#artTop {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 100%;
+	transition: opacity 1.0s ease-in-out;
+}
+#artBottom {
+	top: 0px;
+	left: 0px;
+	box-shadow: 5px 5px 5px #666666;
+	width: 100%;
+	height: 100%;
+	z-index: 1;
+	transition: opacity 1.0s ease-in-out;
+}
+#title {
+	font-size: 1.8em;
+}
+#artistANDalbum {
+	font-size: 1em;
+}
+.controlBtn {
+	width: 2.5em;
+	margin: 0.5em;
+}
+.controlBtn:active {
+	-webkit-filter: drop-shadow(0px 0px 2px rgba(218, 110, 23, 0.8));
+}
+#volumeControl {
+	margin: 5px 0 10px 0;
+}
+#muteBtn {
+	position: relative;
+	top: 50%;
+	width: 20px;
+}
+#shuffleBtn {
+	position: absolute;
+	width: 1.2em;
+	bottom: 0px;
+	left: 105%;
+}
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+	#volumeSlider {
+		-webkit-appearance: none;
+		background-color: black;
+		height: 2px;
+	}
+	#localVolumeSlider {
+		-webkit-appearance: none;
+		background-color: black;
+		height: 2px;
+		max-width: 100%;
+	}
+}
+#volumeSlider:focus {
+	outline: none!important;
+}
+#volumeSlider::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	position: relative;
+	top: 0px;
+	z-index: 1;
+	width: 13px;
+	height: 13px;
+	cursor: pointer;
+	-webkit-border-radius: 50%;
+	-moz-border-radius: 50%;
+	border-radius: 50%;
+	background-color: white;
+	border-color: #DA6E17;
+	border-width: 2px;
+	border-style: solid;
+}
+#section_playlist {
+	background-color: white;
+}
+#shuffle_div {
+	padding: 2px;
+}
+#shuffle_div a {
+	font-weight: bold;
+}
+#shuffle_p {
+	color: rgb(120,120,120);
+	display: inline;
+	font-size: 0.5em;
+}
+#list_1 {
+	float: left;
+	width: 20%;
+	overflow-y:hidden;
+	background-color: #f6f6f6;
+}
+#list_1::-webkit-scrollbar-track {
+	background-color: #f6f6f6;
+}
+#list_1:hover {
+	overflow-y: scroll;
+}
+.artists {
+	transition: background-color 0.5s ease;
+	padding: 4px;
+}
+.artists:hover {
+	background-color: #ececec;
+}
+.artists a:hover {
+	color: #DA6E17;
+}
+.artists_name {
+	font-family: OpenSans-Light;
+	color: black;
+	font-size: 1em;
+}
+.artists_detail {
+	color: rgb(120,120,120);
+	display: inline;
+	font-size: 0.5em;
+}
+.artists_detail:hover {
+	cursor: default;
+}
+#list_2 {
+	width: auto;
+	overflow-y: scroll;
+}
+#list_2 a {
+	display: inline-block;
+	margin: 3px;
+	color: black;
+	transition: color 0s ease;
+}
+#list_2 a:hover {
+	color: #DA6E17;
+}
+.albums {
+	margin-bottom: 40px;
+	overflow: auto;
+}
+.albums_left {
+	float: left;
+	width: 12em;
+	padding: 10px;
+}
+.albums_artwork {
+	box-shadow: 2px 2px 2px #888888;
+	max-width: 100%;
+	max-height: 100%;
+}
+.albums_right {
+	padding: 15px;
+	overflow:hidden;
+}
+.songs_title {
+	font-size: 0.8em;
+}
+.albums_title {
+	font-size: 1.1em;
+}
+.myFooter {
+	font-family: OpenSans-Light;
+	position: absolute;
+	bottom: 0%;
+	color: rgb(225,225,225);
+	background-color: rgba(0,0,0,0.5);
+	width: 50%;
+	text-align: center;
+	font-size: 70%;
+}
