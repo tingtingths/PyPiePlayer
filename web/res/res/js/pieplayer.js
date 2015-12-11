@@ -147,6 +147,11 @@ function setVolume(vol) {
 }
 
 function toggleShuffle() {
+	if (shuffle)
+		document.getElementById("shuffleBtn").setAttribute("style", "-webkit-filter: invert(50%)");
+	else
+		document.getElementById("shuffleBtn").setAttribute("style", "");
+
 	shuffle = !shuffle;
 }
 
