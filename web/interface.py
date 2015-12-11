@@ -49,7 +49,7 @@ class WebInterface(RequestWorker):
 			artist = self.fromHex(req.query["artist"])
 			album = self.fromHex(req.query["album"])
 			title = self.fromHex(req.query["title"])
-			filename = self.toHex(artist + album + title)
+			filename = self.toHex(album + title)
 
 			stream = glob.glob(self.streamroot + filename + "*")
 			if len(stream) == 0:
