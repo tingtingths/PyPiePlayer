@@ -19,7 +19,8 @@ class Library():
 		print("scanning...")
 		if not self.loadlib():
 			self.scan(self.MEDIA_DIR)
-			self.savelib()
+			if len(self.lib) > 0:
+				self.savelib()
 		open("log", "a").write("found " + str(self.lib[self.count_str]) + " songs\n")
 		print("found " + str(self.lib[self.count_str]) + " songs")
 

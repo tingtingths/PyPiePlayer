@@ -177,6 +177,9 @@ function notifySongChange() {
 	document.getElementById("artist").innerHTML = currentSong["artist"];
 	document.getElementById("album").innerHTML = currentSong["album"];
 	document.title = currentSong["title"] + " - " + currentSong["artist"];
+
+	if (lyric)
+		getLyrics(currentSong["artist"], currentSong["title"]);
 }
 
 function playNext() {
@@ -306,6 +309,8 @@ function getAudioStream(artist, album, title) {
 			howler = new Howl({
 				src: [path],
 				preload: true,
+				usingWebAudio: false,
+				mobileAutoEnable: true,
 				onend: function() {
 					playNext();
 				},
@@ -549,12 +554,27 @@ function enableLyric() {
 	} else {
 		lyric = true;
 		document.getElementById("getLyricBtn").style.color = "rgb(255, 92, 92)";
-		document.getElementById("lyricbox").childNodes[0].style.display = "inline";
+		//document.getElementById("lyricbox").childNodes[0].style.display = "inline";
+		getLyrics(currentSong["artist"], currentSong["title"]);
 	}
 }
 
 function getLyrics(artist, title) {
+	var req = new XMLHttpRequest();
 
+	req.onreadystatechange = function() {
+		if (req.readyState == 4 && req.status == 200) {
+			var lyrics = req.responseText;
+			console.log("---------lyrics");
+			console.log(lyrics);
+			console.log("---------------");
+
+			document.getElementById("lyricbox").innerHTML = lyrics;
+		}
+	}
+
+	req.open("GET", "api?req=lyrics&artist=" + artist.hexEncode() + "&title=" + title.hexEncode() + "&now=" + new Date(), true);
+	req.send();
 }
 
 

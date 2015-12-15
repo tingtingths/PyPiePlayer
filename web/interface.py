@@ -1,6 +1,7 @@
 from simplewebframework.framework.worker import RequestWorker
 from player.library import Library
 from player.track import Track
+import web.lyrics
 import urllib
 import hashlib
 import web
@@ -60,6 +61,23 @@ class WebInterface(RequestWorker):
 				filename = os.path.basename(stream[0])
 
 			return 200, "/tmp/stream/" + filename, []
+
+		if cmd == "lyrics":
+			artist = self.fromHex(req.query["artist"])
+			title = self.fromHex(req.query["title"])
+
+			return 200, web.lyrics.lyrics(artist, title), []
+
+		if cmd == "clearcache":
+			libfile = os.path.dirname(inspect.getfile(Library)) + os.path.sep + "library"
+			
+			if os.path.exists(libfile):
+				os.remove(libfile)
+			self.lib.lib = {}
+			self.lib.scan(self.lib.MEDIA_DIR)
+			self.lib.savelib()
+
+			return 200, "okay", []
 
 		return 401, "", []
 
