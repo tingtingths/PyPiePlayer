@@ -6,16 +6,13 @@ from web import res
 from simplewebframework.server.server import Server
 import inspect
 import time
+from log import wlog
 
 
 if __name__ == "__main__":
+	wlog("----------------" + time.strftime("%Y-%m-%d %H:%M:%S------------------------") + "\n")
+	wlog("starting PyPiePlayer...\n")
 	
-	f = open("log", "a")
-	f.write("----------------" + time.strftime("%Y-%m-%d %H:%M:%S------------------------") + "\n")
-	print("starting PyPiePlayer...")
-	f.write("starting PyPiePlayer...\n")
-	f.close()
-
 	lib = Library("D:\\Users\\Ting\\Google Drive\\My Stuffs\\Music") # scan directory
 	web = WebInterface(lib)
 	s = Server(8383)

@@ -1,6 +1,6 @@
 from simplewebframework.framework.filter import RequestFilter
 import base64
-
+from log import wlog
 
 class WebFilter(RequestFilter):
 
@@ -19,8 +19,8 @@ class WebFilter(RequestFilter):
 				auth = base64.b64decode(headers["Authorization"].split(" ")[1]).decode("utf8").split(":")
 				auth_ok = True if auth[0] == self.user and auth[1] == self.passwd else False
 			except Exception as e:
-				print("EXCEPTION...")
-				print(e)
+				wlog("EXCEPTION...")
+				wlog(e)
 		if auth_ok:
 			return auth_ok, 200, "", []
 		else:
