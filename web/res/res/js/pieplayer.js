@@ -287,11 +287,6 @@ function getArtwork(artist, album) { //album title
 			}
 		}
 	}
-	$.get(imageUrl)
-		.fail(function() { //if image not exist in server, fetch again
-			req.open("GET", "api?req=cover&artist=" + artist.hexEncode() + "&album=" + album.hexEncode() + "&now=" + new Date(), true);
-			req.send();
-	});
 }
 
 function getAudioStream(artist, album, title) {
@@ -514,11 +509,6 @@ function getList2(keyword) {
 							imgs[count].src = path;
 						}
 					}
-					$.get(imageUrl)
-						.fail(function() { //if image not exist in server, fetch again
-							reqs[count].open("GET", "api?req=cover&artist=" + artist.hexEncode() + "&album=" + album.hexEncode() + "&now=" + new Date(), true);
-							reqs[count].send();
-						});
 				})(count, artist, album);
 				count += 1;
 			}

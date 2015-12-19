@@ -68,7 +68,7 @@ class WebInterface(RequestWorker):
 
 			return 200, web.lyrics.lyrics(artist, title), []
 
-		if cmd == "clearcache":
+		if cmd == "cleancache":
 			libfile = os.path.dirname(inspect.getfile(Library)) + os.path.sep + "library"
 			
 			if os.path.exists(libfile):
@@ -79,7 +79,7 @@ class WebInterface(RequestWorker):
 
 			return 200, "okay", []
 
-		return 401, "", []
+		return 400, "", []
 
 	def toHex(self, s):
 		return binascii.hexlify(str.encode(s)).decode("utf-8")
