@@ -17,9 +17,12 @@ class Server():
     handler = None
     port = -1
 
-    def __init__(self, port):
+    def __init__(self, port, ssl=False, cert=None, key=None):
         self.server = HTTPServer
         self.port = port
+        self.ssl = ssl
+        self.cert = cert
+        self.key = key
 
     def register(self, handler):
         if isinstance(handler, RequestWorker): # worker
@@ -40,6 +43,9 @@ class Server():
         address = ("", self.port)
         self.handler = buildHandler(self.reqFilter, self.workers, self.webRoot)
         httpd = self.server(address, self.handler)
+        if self.ssl:
+            import ssl
+            httpd.socket = ssl.wrap_socket(httpd.socket, certfile=self.cert, keyfile=self.key, server_side=True)
         print("Server running @ " + str(self.port) + "...")
         try:
             httpd.serve_forever()
@@ -48,7 +54,10 @@ class Server():
 
 # sampleApp
 if __name__ == "__main__":
+    # Without SSL
     s = Server(8282)
+    # With SSL
+    # s = Server(4343, ssl=True, cert="path/to/base64 encoded cert", key="path/to/private key")
     s.register(inspect.getfile(web))
     s.register(HelloFilter())
     s.register(Hello()) # register a worker here
