@@ -5,10 +5,8 @@ PiePlayer daemon - Python 3
 Web interface - js + html
 
 ## Requirements
-Python3
-
-Pillow - py package
-
+Python3  
+Pillow - py package  
 Mutagen - py package
 
 ## Run
