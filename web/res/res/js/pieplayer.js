@@ -252,7 +252,6 @@ function playSingle(artist, album, title) {
 }
 
 function getArtwork(artist, album) { //album title
-	var req = new XMLHttpRequest();
 	var imageUrl = "./tmp/album_art/" + artist.hexEncode() + album.hexEncode() + artworkFormat;
 
 	if (isArtTop) {
@@ -276,17 +275,23 @@ function getArtwork(artist, album) { //album title
 		};
 		isArtTop = true;
 	}
-
-	req.onreadystatechange = function() {
-		if (req.readyState == 4 && req.status == 200) {
-			var path = req.responseText;
-			if (isArtTop) {
-				document.getElementById("artBottom").src = path;
-			} else {
-				document.getElementById("artTop").src = path;
-			}
-		}
-	}
+	
+	$.get(imageUrl)
+        .fail(function() { //if image not exist in server, fetch again
+            var req = new XMLHttpRequest();
+            req.onreadystatechange = function() {
+                if (req.readyState == 4 && req.status == 200) {
+                    var path = req.responseText;
+                    if (isArtTop) {
+                        document.getElementById("artBottom").src = path;
+                    } else {
+                        document.getElementById("artTop").src = path;
+                    }
+                }
+            }
+            req.open("GET", "api?req=cover&artist=" + artist.hexEncode() + "&album=" + album.hexEncode() + "&now=" + new Date(), true);
+            req.send();
+    });
 }
 
 function getAudioStream(artist, album, title) {
@@ -509,6 +514,12 @@ function getList2(keyword) {
 							imgs[count].src = path;
 						}
 					}
+					$.get(imageUrl)
+                        .fail(function() { //if image not exist in server, fetch again
+                            var req = new XMLHttpRequest();
+                            req.open("GET", "api?req=cover&artist=" + artist.hexEncode() + "&album=" + album.hexEncode() + "&now=" + new Date(), true);
+                            req.send();
+                    });
 				})(count, artist, album);
 				count += 1;
 			}

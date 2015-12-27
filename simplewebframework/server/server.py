@@ -36,8 +36,8 @@ class Server():
             suffix = "__init__.py"
             if handler.endswith(suffix):
                 handler = handler[:len(handler) - len(suffix)]
-                if os.path.isdir(handler) and os.path.exists(handler):
-                    self.webRoot = handler
+            if os.path.isdir(handler) and os.path.exists(handler):
+                self.webRoot = handler
 
     def run(self):
         address = ("", self.port)

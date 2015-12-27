@@ -15,6 +15,7 @@ def buildHandler(filter, workers, webRoot):
         def do_GET(self):
             path = self.getPath(self.path)
             query = self.getQuery(self.path)
+            print(query)
             headers = self.getHeaderAttributes(self.headers)
             reqContext = RequestContext(self.client_address, headers, self.command, path, query)
 
@@ -23,7 +24,7 @@ def buildHandler(filter, workers, webRoot):
             if filterResult[0]: # positive result
                 # map with resource in webDir
                 mapped = False
-                if webRoot != None and os.path.exists(webRoot + path):
+                if webRoot != None and os.path.exists(webRoot + os.path.sep + path):
                     mapped = True
                     mapResult = self.sendPath(webRoot + path)
                     self.echoResult(mapResult)
@@ -101,7 +102,7 @@ def buildHandler(filter, workers, webRoot):
             r = urlparse(path)
             if len(r.query) < 1:
                 return None
-            return {q.split("=")[0]: q.split("=")[1] for q in [x for x in r.query.split("&")]}
+            return {q.split("=")[0]: q.split("=")[1] if "=" in q else q for q in [x for x in r.query.split("&")]}
 
         def getHeaderAttributes(self, headers):
             attr = {}
