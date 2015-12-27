@@ -22,13 +22,13 @@ if __name__ == "__main__":
 	f.write("starting PyPiePlayer...\n")
 	f.close()
 
-	lib = Library("D:\\Users\\Ting\\Google Drive\\My Stuffs\\Music") # scan directory
+	lib = Library("path/to/music") # scan directory
 	web = WebInterface(lib)
-	s = Server(4343,
+	# s = Server(4343,
 		ssl=True,
 		cert=current_path + os.path.sep + "web" + os.path.sep + "ssl" + os.path.sep + "cert.pem",
 		key=current_path + os.path.sep + "web" + os.path.sep + "ssl" + os.path.sep + "key")
 	s.register(web)
-	s.register(WebFilter("ting", "ting2750"))
+	s.register(WebFilter("user", "passwd"))
 	s.register(inspect.getfile(res))
 	s.run()
