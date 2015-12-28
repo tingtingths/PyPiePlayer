@@ -24,7 +24,7 @@ if __name__ == "__main__":
 
 	lib = Library("path/to/music") # scan directory
 	web = WebInterface(lib)
-	# s = Server(4343,
+	s = Server(4343,
 		ssl=True,
 		cert=current_path + os.path.sep + "web" + os.path.sep + "ssl" + os.path.sep + "cert.pem",
 		key=current_path + os.path.sep + "web" + os.path.sep + "ssl" + os.path.sep + "key")
