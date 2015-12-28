@@ -1,15 +1,15 @@
-from simplewebframework.framework.handler import *
-from simplewebframework.framework.worker import RequestWorker
-from simplewebframework.framework.filter import RequestFilter
-from simplewebframework.sampleApp import web
-from simplewebframework.sampleApp.hello import Hello
-from simplewebframework.sampleApp.hello_filter import HelloFilter
 import inspect
 import os
 
+from simplewebframework.framework.filter import RequestFilter
+from simplewebframework.framework.handler import *
+from simplewebframework.framework.worker import RequestWorker
+from simplewebframework.sampleApp import web
+from simplewebframework.sampleApp.hello import Hello
+from simplewebframework.sampleApp.hello_filter import HelloFilter
+
 
 class Server():
-
     workers = []
     reqFilter = None
     webRoot = None
@@ -25,13 +25,13 @@ class Server():
         self.key = key
 
     def register(self, handler):
-        if isinstance(handler, RequestWorker): # worker
+        if isinstance(handler, RequestWorker):  # worker
             self.workers.append(handler)
 
-        if isinstance(handler, RequestFilter): # filter
+        if isinstance(handler, RequestFilter):  # filter
             self.reqFilter = handler
 
-        if isinstance(handler, str): # webDir
+        if isinstance(handler, str):  # webDir
             # process web dir
             suffix = "__init__.py"
             if handler.endswith(suffix):
@@ -52,6 +52,7 @@ class Server():
         except KeyboardInterrupt:
             httpd.socket.close()
 
+
 # sampleApp
 if __name__ == "__main__":
     # Without SSL
@@ -60,5 +61,5 @@ if __name__ == "__main__":
     # s = Server(4343, ssl=True, cert="path/to/base64 encoded cert", key="path/to/private key")
     s.register(inspect.getfile(web))
     s.register(HelloFilter())
-    s.register(Hello()) # register a worker here
+    s.register(Hello())  # register a worker here
     s.run()

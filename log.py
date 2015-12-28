@@ -1,3 +1,3 @@
 def wlog(s):
-	print(s)
-	open("log", "a").write(s)
+    print(s)
+    open("log", "a").write(s)

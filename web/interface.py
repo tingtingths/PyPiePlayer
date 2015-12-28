@@ -1,14 +1,13 @@
-from simplewebframework.framework.worker import RequestWorker
-from player.library import Library
-from player.track import Track
-import web.lyrics
-import urllib
-import hashlib
-import web
+import binascii
+import glob
 import inspect
 import os
-import glob
-import binascii
+
+import web
+import web.lyrics
+from player.library import Library
+from player.track import Track
+from simplewebframework.framework.worker import RequestWorker
 
 
 class WebInterface(RequestWorker):
@@ -31,6 +30,8 @@ class WebInterface(RequestWorker):
             return 200, self.lib.get_json(), [("Content-type", "text/plain-text")]
 
         if cmd == "cover":
+            if not os.path.exists(self.artroot):
+                os.makedirs(self.artroot, exist_ok=True)
             artist = self.fromHex(req.query["artist"])
             album = self.fromHex(req.query["album"])
             filename = self.toHex(artist + album)
@@ -46,6 +47,8 @@ class WebInterface(RequestWorker):
             return 200, "/tmp/album_art/" + filename, []
 
         if cmd == "stream":
+            if not os.path.exists(self.streamroot):
+                os.makedirs(self.streamroot, exist_ok=True)
             self.limitcache(self.streamroot, 4)
             artist = self.fromHex(req.query["artist"])
             album = self.fromHex(req.query["album"])

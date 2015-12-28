@@ -1,8 +1,9 @@
-from simplewebframework.framework.filter import RequestFilter
 import re
 
-class HelloFilter(RequestFilter):
+from simplewebframework.framework.filter import RequestFilter
 
+
+class HelloFilter(RequestFilter):
     def filter(self, req):  # req - (clientAddress, headers, method, path, query)
         result = True, 200, "", []
 
