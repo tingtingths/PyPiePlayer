@@ -22,8 +22,10 @@ class Library():
             self.scan(self.MEDIA_DIR)
             if len(self.lib) > 0:
                 self.savelib()
-        open("log", "a").write("found " + str(self.lib[self.count_str]) + " songs\n")
-        print("found " + str(self.lib[self.count_str]) + " songs")
+                open("log", "a").write("found " + str(self.lib[self.count_str]) + " songs\n")
+                print("found " + str(self.lib[self.count_str]) + " songs")
+            else:
+                print("found 0 song")
 
     def loadlib(self):
         de_print = True
@@ -102,11 +104,11 @@ class Library():
             sorted_artist = sorted(self.lib)
             s = "{"
 
-            s += "\"#count\":\"" + str(self.lib[self.count_str]) + "\","
+            s += "\"" + self.count_str + "\":\"" + str(self.lib[self.count_str]) + "\","
             for artist in sorted_artist:
                 if artist != self.count_str:
                     s += "\"" + artist + "\": {"
-                    s += "\"#count\":\"" + str(self.lib[artist][self.count_str]) + "\","
+                    s += "\"" + self.count_str + "\":\"" + str(self.lib[artist][self.count_str]) + "\","
                     for album in self.lib[artist]:
                         if album != self.count_str:
                             s += "\"" + album + "\": ["
