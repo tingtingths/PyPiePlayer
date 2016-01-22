@@ -9,6 +9,10 @@ from web import res
 from web.filter import WebFilter
 from web.interface import WebInterface
 
+username = "user"
+password = "passwd"
+music_path = "path/to/music"
+
 if __name__ == "__main__":
     current_path = os.path.dirname(os.path.abspath(__file__))
 
@@ -21,13 +25,13 @@ if __name__ == "__main__":
     f.write("starting PyPiePlayer...\n")
     f.close()
 
-    lib = Library("path/to/music")  # scan directory
+    lib = Library(music_path)  # scan directory
     web = WebInterface(lib)
     s = Server(4343,
                ssl=True,
                cert=current_path + os.path.sep + "web" + os.path.sep + "ssl" + os.path.sep + "cert.pem",
                key=current_path + os.path.sep + "web" + os.path.sep + "ssl" + os.path.sep + "key")
     s.register(web)
-    s.register(WebFilter("user", "passwd"))
+    s.register(WebFilter(username, password))
     s.register(inspect.getfile(res))
     s.run()
