@@ -106,7 +106,7 @@ function updatePos() {
 			var m = Math.floor(pos / 60);
 			var s = Math.floor(pos - m * 60);
 			document.getElementById("position").innerHTML = m + ":" + pad(s);
-		} 
+		}
 	}
 }
 
@@ -116,7 +116,7 @@ function nextTrack() {
 
 function backTrack() {
 	var pos = howler.seek();
-	
+
 	// prev song
 	if (pos <= 3) {
 		playlist.unshift(prevList.pop());
@@ -275,7 +275,7 @@ function getArtwork(artist, album) { //album title
 		};
 		isArtTop = true;
 	}
-	
+
 	$.get(imageUrl)
         .fail(function() { //if image not exist in server, fetch again
             var req = new XMLHttpRequest();
@@ -453,7 +453,7 @@ function getList2(keyword) {
 		} else {
 			display_albums = artists[keyword];
 		}
-		
+
 		for (var album in display_albums) {
 			if (album != "#count") {
 				var artist = findArtist(album);
@@ -515,11 +515,17 @@ function getList2(keyword) {
 						}
 					}
 					$.get(imageUrl)
-                        .fail(function() { //if image not exist in server, fetch again
-                            var req = new XMLHttpRequest();
-                            req.open("GET", "api?req=cover&artist=" + artist.hexEncode() + "&album=" + album.hexEncode() + "&now=" + new Date(), true);
-                            req.send();
-                    });
+				        .fail(function() { //if image not exist in server, fetch again
+				            var req = new XMLHttpRequest();
+				            req.onreadystatechange = function() {
+				                if (req.readyState == 4 && req.status == 200) {
+				                    var path = req.responseText;
+				                    imgs[count].src = path;
+				                }
+				            }
+				            req.open("GET", "api?req=cover&artist=" + artist.hexEncode() + "&album=" + album.hexEncode() + "&now=" + new Date(), true);
+				            req.send();
+				    });
 				})(count, artist, album);
 				count += 1;
 			}
