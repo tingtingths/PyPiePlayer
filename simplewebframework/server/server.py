@@ -4,9 +4,9 @@ import os
 from simplewebframework.framework.filter import RequestFilter
 from simplewebframework.framework.handler import *
 from simplewebframework.framework.worker import RequestWorker
-from simplewebframework.sampleApp import web
-from simplewebframework.sampleApp.hello import Hello
-from simplewebframework.sampleApp.hello_filter import HelloFilter
+
+from socketserver import ThreadingMixIn
+import threading
 
 
 class Server():
@@ -42,7 +42,7 @@ class Server():
     def run(self):
         address = ("", self.port)
         self.handler = buildHandler(self.reqFilter, self.workers, self.webRoot)
-        httpd = self.server(address, self.handler)
+        httpd = ThreadingServer(address, self.handler)
         if self.ssl:
             import ssl
             httpd.socket = ssl.wrap_socket(httpd.socket, certfile=self.cert, keyfile=self.key, server_side=True)
@@ -52,14 +52,5 @@ class Server():
         except KeyboardInterrupt:
             httpd.socket.close()
 
-
-# sampleApp
-if __name__ == "__main__":
-    # Without SSL
-    s = Server(8282)
-    # With SSL
-    # s = Server(4343, ssl=True, cert="path/to/base64 encoded cert", key="path/to/private key")
-    s.register(inspect.getfile(web))
-    s.register(HelloFilter())
-    s.register(Hello())  # register a worker here
-    s.run()
+class ThreadingServer(ThreadingMixIn, HTTPServer):
+    """Forked threading server"""
