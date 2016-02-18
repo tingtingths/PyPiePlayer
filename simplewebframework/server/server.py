@@ -1,12 +1,8 @@
-import inspect
-import os
+from socketserver import ThreadingMixIn
 
 from simplewebframework.framework.filter import RequestFilter
 from simplewebframework.framework.handler import *
 from simplewebframework.framework.worker import RequestWorker
-
-from socketserver import ThreadingMixIn
-import threading
 
 
 class Server():
@@ -51,6 +47,7 @@ class Server():
             httpd.serve_forever()
         except KeyboardInterrupt:
             httpd.socket.close()
+
 
 class ThreadingServer(ThreadingMixIn, HTTPServer):
     """Forked threading server"""
