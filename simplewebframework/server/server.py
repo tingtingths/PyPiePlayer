@@ -1,8 +1,12 @@
-from socketserver import ThreadingMixIn
+import inspect
+import os
 
 from simplewebframework.framework.filter import RequestFilter
 from simplewebframework.framework.handler import *
 from simplewebframework.framework.worker import RequestWorker
+
+from socketserver import ThreadingMixIn, ForkingMixIn
+import threading
 
 
 class Server():
@@ -13,12 +17,13 @@ class Server():
     handler = None
     port = -1
 
-    def __init__(self, port, ssl=False, cert=None, key=None):
+    def __init__(self, port, ssl=False, cert=None, key=None, multiprocess=False):
         self.server = HTTPServer
         self.port = port
         self.ssl = ssl
         self.cert = cert
         self.key = key
+        self.multiprocess = multiprocess
 
     def register(self, handler):
         if isinstance(handler, RequestWorker):  # worker
@@ -38,7 +43,10 @@ class Server():
     def run(self):
         address = ("", self.port)
         self.handler = buildHandler(self.reqFilter, self.workers, self.webRoot)
-        httpd = ThreadingServer(address, self.handler)
+        if self.multiprocess:
+            httpd = ForkingServer(address, self.handler)
+        else:
+            httpd = ThreadingServer(address, self.handler)
         if self.ssl:
             import ssl
             httpd.socket = ssl.wrap_socket(httpd.socket, certfile=self.cert, keyfile=self.key, server_side=True)
@@ -48,6 +56,8 @@ class Server():
         except KeyboardInterrupt:
             httpd.socket.close()
 
-
 class ThreadingServer(ThreadingMixIn, HTTPServer):
-    """Forked threading server"""
+    """Multiple thread"""
+
+class ForkingServer(ForkingMixIn, HTTPServer):
+    """Multiple process"""

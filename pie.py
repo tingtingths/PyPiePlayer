@@ -10,7 +10,7 @@ from web.filter import WebFilter
 from web.interface import WebInterface
 
 username = "user"
-password = "passwd"
+password = "password"
 music_path = "path/to/music"
 
 if __name__ == "__main__":

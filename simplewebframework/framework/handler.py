@@ -1,5 +1,5 @@
-import os
 import re
+import os
 from http.server import *
 from urllib.parse import urlparse
 
@@ -15,13 +15,12 @@ def buildHandler(filter, workers, webRoot):
         def do_GET(self):
             path = self.getPath(self.path)
             query = self.getQuery(self.path)
-            print(query)
             headers = self.getHeaderAttributes(self.headers)
             reqContext = RequestContext(self.client_address, headers, self.command, path, query)
 
             filterResult = self.filter(filter, reqContext)
 
-            if filterResult[0]:  # positive result
+            if filterResult[0]: # positive result
                 # map with resource in webDir
                 mapped = False
                 if webRoot != None and os.path.exists(webRoot + os.path.sep + path):
@@ -73,6 +72,7 @@ def buildHandler(filter, workers, webRoot):
                 return 200, self.printDir(path), []
 
             return 500, "", []
+
 
         def echoResult(self, result):  # result - (code, bytes/str, headers)
             # print header
