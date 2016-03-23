@@ -50,8 +50,7 @@ class Library():
         return False
 
     def scan(self, scan_dir):
-        if self.json != "":
-            self.json == ""
+        self.json = ""
 
         for root, dirs, files in os.walk(scan_dir):
             for dir in dirs:

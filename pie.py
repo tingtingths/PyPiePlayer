@@ -16,14 +16,8 @@ music_path = "path/to/music"
 if __name__ == "__main__":
     current_path = os.path.dirname(os.path.abspath(__file__))
 
-    wlog("----------------" + time.strftime("%Y-%m-%d %H:%M:%S------------------------") + "\n")
-    wlog("starting PyPiePlayer...\n")
-
-    f = open("log", "a")
-    f.write("----------------" + time.strftime("%Y-%m-%d %H:%M:%S------------------------") + "\n")
-    print("starting PyPiePlayer...")
-    f.write("starting PyPiePlayer...\n")
-    f.close()
+    #wlog("----------------" + time.strftime("%Y-%m-%d %H:%M:%S------------------------") + "\n")
+    #wlog("starting PyPiePlayer...\n")
 
     lib = Library(music_path)  # scan directory
     web = WebInterface(lib)
