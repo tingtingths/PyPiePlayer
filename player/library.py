@@ -17,7 +17,6 @@ class Library():
     def __init__(self, media_dir):
         self.MEDIA_DIR = media_dir
         open("log", "a").write("scanning...\n")
-        print("scanning...")
         if not self.loadlib():
             self.scan(self.MEDIA_DIR)
             if len(self.lib) > 0:
@@ -50,6 +49,7 @@ class Library():
         return False
 
     def scan(self, scan_dir):
+        print("scanning...")
         self.json = ""
 
         for root, dirs, files in os.walk(scan_dir):
