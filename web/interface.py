@@ -2,9 +2,10 @@ import binascii
 import glob
 import inspect
 import os
+import json
 
 import web
-import web.lyrics
+import player.grab_lyrics
 from player.library import Library
 from player.track import Track
 from simplewebframework.framework.worker import RequestWorker
@@ -32,15 +33,15 @@ class WebInterface(RequestWorker):
         if cmd == "cover":
             if not os.path.exists(self.artroot):
                 os.makedirs(self.artroot, exist_ok=True)
-            artist = self.fromHex(req.query["artist"])
-            album = self.fromHex(req.query["album"])
-            filename = self.toHex(artist + album)
+
+            id = req.query["id"]
+            filename = id
             # see if art exist
             art = glob.glob(self.artroot + filename + "*")
             if len(art) == 0:
-                song = self.getsong(artist, album)
-                if song is not None:
-                    b, type = song.get_art_bytes()
+                track = self.lib.get_with_id(id)
+                if track is not None:
+                    b, type = track.get_art_bytes()
                     if b is not None:
                         open(self.artroot + filename + "." + type, "wb").write(b)
                         filename += "." + type
@@ -57,14 +58,14 @@ class WebInterface(RequestWorker):
             if not os.path.exists(self.streamroot):
                 os.makedirs(self.streamroot, exist_ok=True)
             self.limitcache(self.streamroot, 4)
-            artist = self.fromHex(req.query["artist"])
-            album = self.fromHex(req.query["album"])
-            title = self.fromHex(req.query["title"])
 
-            filename = self.toHex(album + title)
+            id = req.query["id"]
+
+            filename = id
             stream = glob.glob(self.streamroot + filename + "*")
             if len(stream) == 0:
-                b, type = self.lib.get(artist, album, title).get_bytes()
+                track = self.lib.get_with_id(id)
+                b, type = track.get_bytes()
                 open(self.streamroot + filename + "." + type, "wb").write(b)
                 filename += "." + type
             else:
@@ -73,10 +74,13 @@ class WebInterface(RequestWorker):
             return 200, "/tmp/stream/" + filename, []
 
         if cmd == "lyrics":
-            artist = self.fromHex(req.query["artist"])
-            title = self.fromHex(req.query["title"])
+            id = req.query["id"]
+            tag = self.lib.get_with_id(id).get_tag()
+            artist = tag["artist"]
+            title = tag["title"]
+            lines = player.grab_lyrics.grab(artist, title)
 
-            return 200, web.lyrics.lyrics(artist, title), []
+            return 200, json.dumps(lines), []
 
         if cmd == "cleancache":
             libfile = os.path.dirname(inspect.getfile(Library)) + os.path.sep + "library"
@@ -96,11 +100,6 @@ class WebInterface(RequestWorker):
 
     def fromHex(self, hexS):
         return binascii.unhexlify(hexS).decode("ISO-8859-1")
-
-    def getsong(self, artist, album):
-        for song in list(self.lib.get(artist, album).values()):
-            if type(song) is Track:
-                return song
 
     def limitcache(self, path, maxitems=0):
         files = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]

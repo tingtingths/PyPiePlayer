@@ -2,6 +2,7 @@ import glob
 import inspect
 import json
 import os
+from collections import namedtuple
 
 import mutagen
 
@@ -11,8 +12,11 @@ from player.track import Track
 class Library():
     media_type = [".m4a", ".mp3", ".flac", ".aac"]
     lib = {}
+    song_count = 0
     count_str = "#count"
     json = ""
+
+    Song = namedtuple("Song", ["id", "track_obj"])
 
     def __init__(self, media_dir):
         self.MEDIA_DIR = media_dir
@@ -21,7 +25,6 @@ class Library():
             self.scan(self.MEDIA_DIR)
             if len(self.lib) > 0:
                 self.savelib()
-                open("log", "a").write("found " + str(self.lib[self.count_str]) + " songs\n")
                 print("found " + str(self.lib[self.count_str]) + " songs")
             else:
                 print("found 0 song")
@@ -72,10 +75,23 @@ class Library():
 
     def get(self, artist, album=None, title=None):
         if album is not None and title is not None:
-            return self.lib[artist][album][title]
+            return self.lib[artist][album][title].track_obj
         if album is not None:
             return self.lib[artist][album]
         return self.lib[artist]
+
+    def get_with_id(self, id):
+        for artist in self.lib:
+            if artist != self.count_str:
+                for album in self.lib[artist]:
+                    if album != self.count_str:
+                        for title in self.lib[artist][album]:
+                            if title != self.count_str:
+                                song_id = str(self.lib[artist][album][title].id)
+                                if song_id == id:
+                                    return self.lib[artist][album][title].track_obj
+        return None
+
 
     def put_song(self, artist, album, title, track_num, track):
         if artist not in self.lib:
@@ -85,7 +101,8 @@ class Library():
         if title not in self.lib[artist][album]:
             self.lib[artist][album][title] = None
 
-        self.lib[artist][album][title] = track
+        self.lib[artist][album][title] = self.Song(self.song_count, track)
+        self.song_count += 1
 
         if self.count_str not in self.lib:
             self.lib[self.count_str] = 0
@@ -113,11 +130,12 @@ class Library():
                             s += "\"" + album + "\": ["
                             for title in self.lib[artist][album]:
                                 if title != self.count_str:
+                                    id = str(self.lib[artist][album][title].id)
                                     if toFile:
-                                        s += "[\"" + title + "\",\"" + self.lib[artist][album][title].path.replace("\\",
-                                                                                                                   "/") + "\"],"
+                                        track = self.lib[artist][album][title].track_obj
+                                        s += "[\"" + title + "\",\"" + track.path.replace("\\", "/") + "\"],"
                                     else:
-                                        s += "\"" + title + "\","
+                                        s += "{\"title\":\"" + title + "\", \"id\":\"" + id + "\"},"
                             s = s.rstrip(",")
                             s += "],"  # album
                     s = s.rstrip(",")

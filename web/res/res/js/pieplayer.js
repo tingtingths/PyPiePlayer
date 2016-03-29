@@ -127,7 +127,7 @@ function nextTrack() {
         var idx = shuffle ? Math.floor(Math.random() * playlist.length) : 0;
         var song = playlist[idx];
         prevList.push(song);
-        getAudioStream(song[0], song[1], song[2]);
+        getAudioStream(song[0], song[1], song[2].title);
         playlist.splice(idx, 1);
     }
 }
@@ -204,7 +204,7 @@ function notifySongChange() {
     document.title = currentSong["title"] + " - " + currentSong["artist"];
 
     if (lyric)
-        getLyrics(currentSong["artist"], currentSong["title"]);
+        getLyrics(currentSong["artist"], currentSong["album"], currentSong["title"]);
 }
 
 function shuffleAll() {
@@ -265,7 +265,8 @@ function playSingle(artist, album, title) {
 }
 
 function getArtwork(artist, album) { //album title
-    var imageUrl = "./tmp/album_art/" + artist.hexEncode() + album.hexEncode() + artworkFormat;
+    var id = getIdOfFirstSong(artist, album);
+    var imageUrl = "";
 
     if (isArtTop) {
         if (document.getElementById("artTop").src.replace(/^.*[\\\/]/, '') == album.hexEncode() + artworkFormat) { //if same
@@ -289,25 +290,23 @@ function getArtwork(artist, album) { //album title
         isArtTop = true;
     }
 
-    $.get(imageUrl)
-        .fail(function() { //if image not exist in server, fetch again
-            var req = new XMLHttpRequest();
-            req.onreadystatechange = function() {
-                if (req.readyState == 4 && req.status == 200) {
-                    var path = req.responseText;
-                    if (isArtTop) {
-                        document.getElementById("artBottom").src = path;
-                    } else {
-                        document.getElementById("artTop").src = path;
-                    }
-                }
+    var req = new XMLHttpRequest();
+    req.onreadystatechange = function() {
+        if (req.readyState == 4 && req.status == 200) {
+            var path = req.responseText;
+            if (isArtTop) {
+                document.getElementById("artBottom").src = path;
+            } else {
+                document.getElementById("artTop").src = path;
             }
-            req.open("GET", "api?req=cover&artist=" + artist.hexEncode() + "&album=" + album.hexEncode() + "&now=" + new Date(), true);
-            req.send();
-    });
+        }
+    }
+    req.open("GET", "api?req=cover&id=" + id + "&now=" + new Date(), true);
+    req.send();
 }
 
 function getAudioStream(artist, album, title) {
+    var id = getId(artist, album, title);
     var req = new XMLHttpRequest();
     req.onreadystatechange = function() {
         if (req.readyState == 4 && req.status == 200) {
@@ -326,7 +325,7 @@ function getAudioStream(artist, album, title) {
             }
         }
     }
-    req.open("GET", "api?req=stream&artist=" + artist.hexEncode() + "&album=" + album.hexEncode() + "&title=" + title.hexEncode() + "&now=" + new Date(), true);
+    req.open("GET", "api?req=stream&id=" + id + "&now=" + new Date(), true);
     req.send();
 }
 
@@ -468,10 +467,6 @@ function getList2(keyword) {
                     div_right.appendChild(a);
                     div_right.appendChild(document.createElement("hr"));
 
-                    //try to use browser cache for the artwork
-                    var imageUrl = "./tmp/album_art/" + artist.hexEncode() + album.hexEncode() + artworkFormat;
-                    imgs[count].src = imageUrl;
-
                     imgs[count].className = "albums_artwork";
 
                     // for each song in album
@@ -480,7 +475,7 @@ function getList2(keyword) {
                             var track = display_albums[album][i];
                             var a = document.createElement("a");
                             a.className = "songs_title";
-                            a.appendChild(document.createTextNode(track));
+                            a.appendChild(document.createTextNode(track.title));
                             a.onclick = function() {
                                 playSingle(artist, album, track);
                             }
@@ -497,18 +492,17 @@ function getList2(keyword) {
                             imgs[count].src = path;
                         }
                     }
-                    $.get(imageUrl)
-                        .fail(function() { //if image not exist in server, fetch again
-                            var req = new XMLHttpRequest();
-                            req.onreadystatechange = function() {
-                                if (req.readyState == 4 && req.status == 200) {
-                                    var path = req.responseText;
-                                    imgs[count].src = path;
-                                }
-                            }
-                            req.open("GET", "api?req=cover&artist=" + artist.hexEncode() + "&album=" + album.hexEncode() + "&now=" + new Date(), true);
-                            req.send();
-                    });
+
+                    var req = new XMLHttpRequest();
+                    req.onreadystatechange = function() {
+                        if (req.readyState == 4 && req.status == 200) {
+                            var path = req.responseText;
+                            imgs[count].src = path;
+                        }
+                    }
+                    var id = getIdOfFirstSong(artist, album);
+                    req.open("GET", "api?req=cover&id=" + id + "&now=" + new Date(), true);
+                    req.send();
                 })(count, artist, album);
                 count += 1;
             }
@@ -528,37 +522,53 @@ function findArtist(album) {
     return "";
 }
 
-function enableLyric() {
+function enableLyrics() {
     if (lyric) {
         lyric = false;
         document.getElementById("getLyricBtn").style.color = "white";
-        document.getElementById("lyricbox").childNodes[0].style.display = "none";
+        document.getElementById("lyricbox").style.display = "none";
     } else {
         lyric = true;
         document.getElementById("getLyricBtn").style.color = "rgb(255, 92, 92)";
-        //document.getElementById("lyricbox").childNodes[0].style.display = "inline";
-        getLyrics(currentSong["artist"], currentSong["title"]);
+        document.getElementById("lyricbox").style.display = "block";
+        getLyrics(currentSong["artist"], currentSong["album"], currentSong["title"]);
     }
 }
 
-function getLyrics(artist, title) {
+function getLyrics(artist, album, title) {
     var req = new XMLHttpRequest();
+    var id  = getId(artist, album, title);
+    var box = document.getElementById("lyricbox");
 
     req.onreadystatechange = function() {
         if (req.readyState == 4 && req.status == 200) {
-            var lyrics = req.responseText;
-            console.log("---------lyrics");
-            console.log(lyrics);
-            console.log("---------------");
-
-            document.getElementById("lyricbox").innerHTML = lyrics;
+            box.innerHTML = "";
+            var lines = JSON.parse(req.responseText);
+            for (i in lines) {
+                var line = lines[i];
+                box.innerHTML += line + "<br>";
+            }
         }
     }
-
-    req.open("GET", "api?req=lyrics&artist=" + artist.hexEncode() + "&title=" + title.hexEncode() + "&now=" + new Date(), true);
+    box.innerHTML = "";
+    box.innerHTML = "Downloading..."
+    req.open("GET", "api?req=lyrics&id=" + id + "&now=" + new Date(), true);
     req.send();
 }
 
+function getId(artist, album, title) {
+    for (i in artists[artist][album]) {
+        var song = artists[artist][album][i];
+        if (song.title == title) {
+            return song.id;
+        }
+    }
+    return -1;
+}
+
+function getIdOfFirstSong(artist, album) {
+    return artists[artist][album][0].id;
+}
 
 function pad(num) { //pad number with leading 0
     if (num < 10) {
