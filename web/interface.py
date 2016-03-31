@@ -37,9 +37,8 @@ class WebInterface(RequestWorker):
             id = req.query["id"]
             filename = id
             # see if art exist
-            art = glob.glob(self.artroot + filename + "*")
-            #if len(art) == 0:
-            if True:
+            art = glob.glob(self.artroot + filename + ".jpg")
+            if len(art) == 0:
                 track = self.lib.get_with_id(id)
                 if track is not None:
                     b, type = track.get_art_bytes()

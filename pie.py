@@ -16,10 +16,8 @@ music_path = "path/to/music"
 if __name__ == "__main__":
     current_path = os.path.dirname(os.path.abspath(__file__))
 
-    #wlog("----------------" + time.strftime("%Y-%m-%d %H:%M:%S------------------------") + "\n")
-    #wlog("starting PyPiePlayer...\n")
-
-    lib = Library(music_path)  # scan directory
+    suffix = "__init__.py"
+    lib = Library(music_path, inspect.getfile(res)[:len(inspect.getfile(res)) - len(suffix)] + "tmp")  # scan directory
     web = WebInterface(lib)
     s = Server(4343,
                ssl=True,
