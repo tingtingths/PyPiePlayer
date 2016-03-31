@@ -38,7 +38,8 @@ class WebInterface(RequestWorker):
             filename = id
             # see if art exist
             art = glob.glob(self.artroot + filename + "*")
-            if len(art) == 0:
+            #if len(art) == 0:
+            if True:
                 track = self.lib.get_with_id(id)
                 if track is not None:
                     b, type = track.get_art_bytes()
