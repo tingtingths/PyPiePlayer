@@ -22,7 +22,3 @@ def parse_lyric_wikia(html):
     for script in lyricbox.find_all("script"):
         script.decompose()
     return lyricbox.get_text("\n", strip=True).split("\n")
-
-if __name__ == "__main__":
-    lines = grab("Adele", "Hello")
-    print(lines)

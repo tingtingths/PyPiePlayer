@@ -39,10 +39,14 @@ class Track():
             if self.artist[0] == "":
                 self.artist = f["artist"]
 
-            self.artist = self.artist[0]
-            self.album = self.album[0]
-            self.title = self.title[0]
-            self.track_num = self.track_num[0]
+            if type(self.artist) is list:
+                self.artist = self.artist[0]
+            if type(self.album) is list:
+                self.album = self.album[0]
+            if type(self.title) is list:
+                self.title = self.title[0]
+            if type(self.track_num) is list:
+                self.track_num = self.track_num[0]
 
             return {"artist": self.artist, "album": self.album, "title": self.title, "track_num": self.track_num}
 
