@@ -27,6 +27,13 @@ class WebInterface(RequestWorker):
     def do_GET(self, req):  # req - (clientAddress, headers, method, path, query)
         cmd = req.query["req"]
 
+        if cmd == "id":
+            id = req.query["id"]
+            tag = self.lib.get_with_id(id).get_tag()
+            artist = tag["artist"]
+            title = tag["title"]
+            return 200, title + " - " + artist, []
+
         if cmd == "json":
             return 200, self.lib.get_json(), [("Content-type", "text/plain-text")]
 
@@ -46,6 +53,7 @@ class WebInterface(RequestWorker):
                         open(self.artroot + filename + "." + type, "wb").write(b)
                         filename += "." + type
                     else:
+                        print("Failed to get cover for id " + id)
                         return 200, "/res/image/dummy.png", []
                 else:
                     return 200, "/res/image/dummy.png", []
@@ -83,14 +91,7 @@ class WebInterface(RequestWorker):
             return 200, json.dumps(lines), []
 
         if cmd == "cleancache":
-            libfile = os.path.dirname(inspect.getfile(Library)) + os.path.sep + "library"
-
-            if os.path.exists(libfile):
-                os.remove(libfile)
-            self.lib.lib = {}
-            self.lib.scan(self.lib.MEDIA_DIR)
-            self.lib.savelib()
-
+            self.lib.reinit()
             return 200, "okay", []
 
         return 400, "", []
