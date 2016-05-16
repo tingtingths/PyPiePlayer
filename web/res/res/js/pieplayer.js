@@ -95,6 +95,11 @@ window.onload = function() {
     setVolume(curVol);
     getList1();
     setInterval(function() { updatePos() }, refreshRate);
+
+    changeBkg();
+	setInterval(function() {
+		changeBkg();
+	}, bkg_refresh_rate); //change bkg for every bkg_refresh_rate
 };
 
 function hoverProgressText(ele) {

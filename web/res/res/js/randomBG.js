@@ -7,11 +7,6 @@ var isBkgTop = false;
 var pool = [];
 var img = new Image();
 
-	changeBkg();
-	setInterval(function() {
-		changeBkg();
-	}, bkg_refresh_rate); //change bkg for every bkg_refresh_rate
-
 function changeBkg() {
 	if (pool.length == 0) {
 		for (var i = bkg_min; i <= bkg_max; i++) {
@@ -42,7 +37,7 @@ function changeBkg() {
 
 			isBkgTop = false;
 		} else {
-			document.getElementById("bkgBottom").style.backgroundImage = "url(" + img.src + ")";;
+			document.getElementById("bkgBottom").style.backgroundImage = "url(" + img.src + ")";
 			document.getElementById("bkgTop").style.opacity = "0";
 			isBkgTop = true;
 		}
