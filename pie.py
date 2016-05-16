@@ -10,7 +10,8 @@ from web.filter import WebFilter
 from web.interface import WebInterface
 
 username = "user"
-password = "password"
+# sha-256, default: password
+password_hash = "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8"
 music_path = "path/to/music"
 
 if __name__ == "__main__":
@@ -24,6 +25,6 @@ if __name__ == "__main__":
                cert=current_path + os.path.sep + "web" + os.path.sep + "ssl" + os.path.sep + "cert.pem",
                key=current_path + os.path.sep + "web" + os.path.sep + "ssl" + os.path.sep + "key")
     s.register(web)
-    s.register(WebFilter(username, password))
+    s.register(WebFilter(username, password_hash))
     s.register(inspect.getfile(res))
     s.run()
