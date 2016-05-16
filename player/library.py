@@ -35,6 +35,19 @@ class Library():
             else:
                 print("found 0 song")
 
+    def reinit(self):
+        # remove cache
+        if os.path.exists(self.CACHE_DIR):
+            shutil.rmtree(self.CACHE_DIR)
+            print("remove cache")
+        self.lib = {}
+        self.scan(self.MEDIA_DIR)
+        if len(self.lib) > 0:
+            self.savelib()
+            print("found " + str(self.lib[self.count_str]) + " songs")
+        else:
+            print("found 0 song")
+
     def loadlib(self):
         de_print = True
         LIB_DIR = os.path.dirname(inspect.getfile(Track)) + os.path.sep
