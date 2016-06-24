@@ -16,7 +16,7 @@ class Library():
     count_str = "#count"
     json = ""
 
-    Song = namedtuple("Song", ["id", "track_obj"])
+    Song = namedtuple("Song", ["id", "artist", "track_obj"])
 
     def __init__(self, media_dir, cache_dir):
         self.MEDIA_DIR = media_dir
@@ -81,7 +81,7 @@ class Library():
                 if tup:
                     tag = tup[0]
                     track = tup[1]
-                    self.put_song(tag["albumartist"], tag["album"]
+                    self.put_song(tag["albumartist"], tag["artist"], tag["album"]
                                   , tag["title"], tag["track_num"], track)
 
     def get_tag(self, file):
@@ -111,7 +111,7 @@ class Library():
         return None
 
 
-    def put_song(self, albumartist, album, title, track_num, track, id=-1):
+    def put_song(self, albumartist, artist, album, title, track_num, track, id=-1):
         if albumartist not in self.lib:
             self.lib[albumartist] = {}
         if album not in self.lib[albumartist]:
@@ -120,10 +120,10 @@ class Library():
             self.lib[albumartist][album][title] = None
 
         if id == -1:
-            self.lib[albumartist][album][title] = self.Song(self.song_count, track)
+            self.lib[albumartist][album][title] = self.Song(self.song_count, artist, track)
             self.song_count += 1
         else:
-            self.lib[albumartist][album][title] = self.Song(id, track)
+            self.lib[albumartist][album][title] = self.Song(id, artist, track)
 
         if self.count_str not in self.lib:
             self.lib[self.count_str] = 0
@@ -142,7 +142,7 @@ class Library():
             s = "{"
 
             s += "\"" + self.count_str + "\":\"" + str(self.lib[self.count_str]) + "\","
-            for artist in sorted_artist:
+            for artist in sorted_artist: # album artist !
                 if artist != self.count_str:
                     s += "\"" + artist + "\": {"
                     s += "\"" + self.count_str + "\":\"" + str(self.lib[artist][self.count_str]) + "\","
@@ -152,11 +152,12 @@ class Library():
                             for title in self.lib[artist][album]:
                                 if title != self.count_str:
                                     id = str(self.lib[artist][album][title].id)
+                                    _artist = str(self.lib[artist][album][title].artist)# track artist
                                     track = self.lib[artist][album][title].track_obj
                                     if toFile:
                                         s += "[\"" + title + "\",\"" + track.path.replace("\\", "/") + "\",\"" + id + "\"],"
                                     else:
-                                        s += "{\"title\":\"" + title + "\", \"id\":\"" + id + "\", \"artist\":\"" + track.get_tag()["artist"] + "\"},"
+                                        s += "{\"title\":\"" + title + "\", \"id\":\"" + id + "\", \"artist\":\"" + _artist + "\"},"
                             s = s.rstrip(",")
                             s += "],"  # album
                     s = s.rstrip(",")
