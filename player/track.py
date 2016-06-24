@@ -7,6 +7,7 @@ from PIL import Image
 
 
 class Track():
+    albumartist = [""]
     artist = [""]
     album = [""]
     title = [""]
@@ -20,7 +21,11 @@ class Track():
 
         if f:
             try:
-                self.artist = f["albumartist"]
+                self.albumartist = f["albumartist"]
+            except:
+                pass
+            try:
+                self.artist = f["artist"]
             except:
                 pass
             try:
@@ -36,9 +41,8 @@ class Track():
             except:
                 pass
 
-            if self.artist[0] == "":
-                self.artist = f["artist"]
-
+            if type(self.albumartist) is list:
+                self.albumartist = self.albumartist[0]
             if type(self.artist) is list:
                 self.artist = self.artist[0]
             if type(self.album) is list:
@@ -48,7 +52,7 @@ class Track():
             if type(self.track_num) is list:
                 self.track_num = self.track_num[0]
 
-            return {"artist": self.artist, "album": self.album, "title": self.title, "track_num": self.track_num}
+            return {"artist": self.artist, "album": self.album, "title": self.title, "track_num": self.track_num, "albumartist" : self.albumartist}
 
         return None
 

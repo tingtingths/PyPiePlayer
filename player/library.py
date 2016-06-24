@@ -81,7 +81,7 @@ class Library():
                 if tup:
                     tag = tup[0]
                     track = tup[1]
-                    self.put_song(tag["artist"], tag["album"]
+                    self.put_song(tag["albumartist"], tag["album"]
                                   , tag["title"], tag["track_num"], track)
 
     def get_tag(self, file):
@@ -111,29 +111,29 @@ class Library():
         return None
 
 
-    def put_song(self, artist, album, title, track_num, track, id=-1):
-        if artist not in self.lib:
-            self.lib[artist] = {}
-        if album not in self.lib[artist]:
-            self.lib[artist][album] = {}
-        if title not in self.lib[artist][album]:
-            self.lib[artist][album][title] = None
+    def put_song(self, albumartist, album, title, track_num, track, id=-1):
+        if albumartist not in self.lib:
+            self.lib[albumartist] = {}
+        if album not in self.lib[albumartist]:
+            self.lib[albumartist][album] = {}
+        if title not in self.lib[albumartist][album]:
+            self.lib[albumartist][album][title] = None
 
         if id == -1:
-            self.lib[artist][album][title] = self.Song(self.song_count, track)
+            self.lib[albumartist][album][title] = self.Song(self.song_count, track)
             self.song_count += 1
         else:
-            self.lib[artist][album][title] = self.Song(id, track)
+            self.lib[albumartist][album][title] = self.Song(id, track)
 
         if self.count_str not in self.lib:
             self.lib[self.count_str] = 0
-        if self.count_str not in self.lib[artist]:
-            self.lib[artist][self.count_str] = 0
-        if self.count_str not in self.lib[artist][album]:
-            self.lib[artist][album][self.count_str] = 0
+        if self.count_str not in self.lib[albumartist]:
+            self.lib[albumartist][self.count_str] = 0
+        if self.count_str not in self.lib[albumartist][album]:
+            self.lib[albumartist][album][self.count_str] = 0
 
-        self.lib[artist][album][self.count_str] += 1
-        self.lib[artist][self.count_str] += 1
+        self.lib[albumartist][album][self.count_str] += 1
+        self.lib[albumartist][self.count_str] += 1
         self.lib[self.count_str] += 1
 
     def get_json(self, toFile=False):
@@ -152,11 +152,11 @@ class Library():
                             for title in self.lib[artist][album]:
                                 if title != self.count_str:
                                     id = str(self.lib[artist][album][title].id)
+                                    track = self.lib[artist][album][title].track_obj
                                     if toFile:
-                                        track = self.lib[artist][album][title].track_obj
                                         s += "[\"" + title + "\",\"" + track.path.replace("\\", "/") + "\",\"" + id + "\"],"
                                     else:
-                                        s += "{\"title\":\"" + title + "\", \"id\":\"" + id + "\"},"
+                                        s += "{\"title\":\"" + title + "\", \"id\":\"" + id + "\", \"artist\":\"" + track.get_tag()["artist"] + "\"},"
                             s = s.rstrip(",")
                             s += "],"  # album
                     s = s.rstrip(",")

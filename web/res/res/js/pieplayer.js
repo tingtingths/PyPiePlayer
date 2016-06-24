@@ -4,7 +4,7 @@ var refreshRate = 500; //ms
 var lyric = false;
 var artworkFormat = ".jpg";
 var prevList = [];
-var currentSong = {"artist" : null, "album" : null, "title" : null};
+var currentSong = {"artist" : null, "album" : null, "title" : null, "albumartist" : null};
 var playlist = [];
 var shuffle = true;
 var vol = 0.8;
@@ -132,7 +132,7 @@ function nextTrack() {
         var idx = shuffle ? Math.floor(Math.random() * playlist.length) : 0;
         var song = playlist[idx];
         prevList.push(song);
-        getAudioStream(song[0], song[1], song[2].title);
+        getAudioStream(song[0], song[1], song[2].title, song[2].artist);
         playlist.splice(idx, 1);
     }
 }
@@ -209,20 +209,20 @@ function notifySongChange() {
     document.title = currentSong["title"] + " - " + currentSong["artist"];
 
     if (lyric)
-        getLyrics(currentSong["artist"], currentSong["album"], currentSong["title"]);
+        getLyrics(currentSong["albumartist"], currentSong["album"], currentSong["title"]);
 }
 
 function shuffleAll() {
     shuffle = true;
     playlist = [];
 
-    for (artist in artists) {
-        if (artist != "#count") {
-            for (album in artists[artist]) {
+    for (albumartist in artists) {
+        if (albumartist != "#count") {
+            for (album in artists[albumartist]) {
                 if (album != "#count") {
-                    for (i in artists[artist][album]) {
-                        var title = artists[artist][album][i]
-                        playlist.push([artist, album, title]);
+                    for (i in artists[albumartist][album]) {
+                        var title = artists[albumartist][album][i];
+                        playlist.push([albumartist, album, title]);
                     }
                 }
             }
@@ -233,14 +233,14 @@ function shuffleAll() {
     nextTrack();
 }
 
-function playArtist(artist) {
+function playArtist(albumartist) {
     playlist = [];
 
-    for (album in artists[artist]) {
+    for (album in artists[albumartist]) {
         if (album != "#count") {
-            for (i in artists[artist][album]) {
-                var title = artists[artist][album][i]
-                playlist.push([artist, album, title]);
+            for (i in artists[albumartist][album]) {
+                var title = artists[albumartist][album][i]
+                playlist.push([albumartist, album, title]);
             }
         }
     }
@@ -249,28 +249,28 @@ function playArtist(artist) {
     nextTrack();
 }
 
-function playAlbum(artist, album) {
+function playAlbum(albumartist, album) {
     playlist = [];
 
-    for (i in artists[artist][album]) {
-        var title = artists[artist][album][i]
-        playlist.push([artist, album, title]);
+    for (i in artists[albumartist][album]) {
+        var title = artists[albumartist][album][i];
+        playlist.push([albumartist, album, title]);
     }
 
     playerStatus = 2;
     nextTrack();
 }
 
-function playSingle(artist, album, title) {
+function playSingle(albumartist, album, title) {
     playlist = [];
 
-    playlist.push([artist, album, title]);
+    playlist.push([albumartist, album, title]);
     playerStatus = 2;
     nextTrack();
 }
 
-function getArtwork(artist, album) { //album title
-    var id = getIdOfFirstSong(artist, album);
+function getArtwork(albumartist, album) { //album title
+    var id = getIdOfFirstSong(albumartist, album);
     var imageUrl = "";
 
     if (isArtTop) {
@@ -310,16 +310,17 @@ function getArtwork(artist, album) { //album title
     req.send();
 }
 
-function getAudioStream(artist, album, title) {
-    var id = getId(artist, album, title);
+function getAudioStream(albumartist, album, title, artist) {
+    var id = getId(albumartist, album, title);
     var req = new XMLHttpRequest();
     req.onreadystatechange = function() {
         if (req.readyState == 4 && req.status == 200) {
             var path = req.responseText;
             player.src = path;
             player.load();
-            if (artist != currentSong["artist"] || album != currentSong["album"])
-                getArtwork(artist, album);
+            if (albumartist != currentSong["albumartist"] || album != currentSong["album"])
+                getArtwork(albumartist, album);
+            currentSong["albumartist"] = albumartist;
             currentSong["artist"] = artist;
             currentSong["album"] = album;
             currentSong["title"] = title;
@@ -536,13 +537,13 @@ function enableLyrics() {
         lyric = true;
         document.getElementById("getLyricBtn").style.color = "rgb(255, 92, 92)";
         document.getElementById("lyricbox").style.display = "block";
-        getLyrics(currentSong["artist"], currentSong["album"], currentSong["title"]);
+        getLyrics(currentSong["albumartist"], currentSong["album"], currentSong["title"]);
     }
 }
 
-function getLyrics(artist, album, title) {
+function getLyrics(albumartist, album, title) {
     var req = new XMLHttpRequest();
-    var id  = getId(artist, album, title);
+    var id  = getId(albumartist, album, title);
     var box = document.getElementById("lyricbox");
 
     req.onreadystatechange = function() {
@@ -561,9 +562,9 @@ function getLyrics(artist, album, title) {
     req.send();
 }
 
-function getId(artist, album, title) {
-    for (i in artists[artist][album]) {
-        var song = artists[artist][album][i];
+function getId(albumartist, album, title) {
+    for (i in artists[albumartist][album]) {
+        var song = artists[albumartist][album][i];
         if (song.title == title) {
             return song.id;
         }
