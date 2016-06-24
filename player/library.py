@@ -154,9 +154,6 @@ class Library():
                                 if title != self.count_str:
                                     id = str(self.lib[artist][album][title].id)
                                     _artist = self.lib[artist][album][title].artist # track artist
-                                    if type(_artist) is int:
-                                        print("#######")
-                                        print(_artist)
                                     track = self.lib[artist][album][title].track_obj
                                     if toFile:
                                         s += "[\"" + title + "\",\"" + track.path.replace("\\", "/") + "\",\"" + id + "\", \"" + _artist + "\"],"
