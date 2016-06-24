@@ -57,12 +57,13 @@ class Library():
             try:
                 # read
                 j_artist = json.load(open(self.libpath, encoding="utf-8"))
-                for artist in j_artist:
-                    if artist != self.count_str:
-                        for album in j_artist[artist]:
+                for albumartist in j_artist:
+                    if albumartist != self.count_str:
+                        for album in j_artist[albumartist]:
                             if album != self.count_str:
-                                for track in j_artist[artist][album]:
-                                    self.put_song(artist, album, track[0], 0, Track(track[1]), track[2])
+                                for track in j_artist[albumartist][album]:
+                                    # albumartist, artist, album, title, track_num, track, id
+                                    self.put_song(albumartist, track[3], album, track[0], 0, Track(track[1]), track[2])
             except Exception as e:
                 print(e)
                 return False
@@ -152,10 +153,13 @@ class Library():
                             for title in self.lib[artist][album]:
                                 if title != self.count_str:
                                     id = str(self.lib[artist][album][title].id)
-                                    _artist = str(self.lib[artist][album][title].artist)# track artist
+                                    _artist = self.lib[artist][album][title].artist # track artist
+                                    if type(_artist) is int:
+                                        print("#######")
+                                        print(_artist)
                                     track = self.lib[artist][album][title].track_obj
                                     if toFile:
-                                        s += "[\"" + title + "\",\"" + track.path.replace("\\", "/") + "\",\"" + id + "\"],"
+                                        s += "[\"" + title + "\",\"" + track.path.replace("\\", "/") + "\",\"" + id + "\", \"" + _artist + "\"],"
                                     else:
                                         s += "{\"title\":\"" + title + "\", \"id\":\"" + id + "\", \"artist\":\"" + _artist + "\"},"
                             s = s.rstrip(",")
