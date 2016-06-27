@@ -102,6 +102,19 @@ window.onload = function() {
 	}, bkg_refresh_rate); //change bkg for every bkg_refresh_rate
 };
 
+// key listening
+window.onkeyup = function(e) {    
+    if (e.keyCode == 32 || e.keyCode == 179) { // whitespace or media play/pause
+        playPause();
+    }
+    if (e.keyCode == 177) { // media back
+        backTrack();
+    }
+    if (e.keyCode == 176) { // media next
+        nextTrack();
+    }
+};
+
 function hoverProgressText(ele) {
     document.getElementById("progressText").style.opacity = "1";
     setTimeout(function() {
@@ -160,7 +173,8 @@ function playPause() {
     if (playerStatus == 2) {
         player.pause();
     } else if (playerStatus == 1 || playerStatus == 0) {
-        player.play();
+        if (currentSong["title"] != null)
+            player.play();
     }
 }
 
