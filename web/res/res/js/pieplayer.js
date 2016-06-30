@@ -7,7 +7,7 @@ var prevList = [];
 var currentSong = {"artist" : null, "album" : null, "title" : null, "albumartist" : null};
 var playlist = [];
 var shuffle = true;
-var vol = 0.8;
+var vol = 1;
 
 //btn name
 var playBtn = "playNew.png";
@@ -97,13 +97,13 @@ window.onload = function() {
     setInterval(function() { updatePos() }, refreshRate);
 
     changeBkg();
-	setInterval(function() {
-		changeBkg();
-	}, bkg_refresh_rate); //change bkg for every bkg_refresh_rate
+    setInterval(function() {
+        changeBkg();
+    }, bkg_refresh_rate); //change bkg for every bkg_refresh_rate
 };
 
 // key listening
-window.onkeyup = function(e) {    
+window.onkeyup = function(e) {
     if (e.keyCode == 32 || e.keyCode == 179) { // whitespace or media play/pause
         playPause();
     }
