@@ -13,3 +13,7 @@ Mutagen - py package
 Modify settings in pie.py, then
 
     python pie.py
+
+## Screenshot
+![alt text](screenshot.png "Screenshot")
+
