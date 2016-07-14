@@ -52,8 +52,7 @@ class Track():
             if type(self.track_num) is list:
                 self.track_num = self.track_num[0]
 
-            self.albumartist = self.artist if self.albumartist.strip() == "" 
-else self.albumartist
+            self.albumartist = self.artist if self.albumartist.strip() == "" else self.albumartist
 
             return {"artist": self.artist, "album": self.album, "title": self.title, "track_num": self.track_num, "albumartist" : self.albumartist}
 
