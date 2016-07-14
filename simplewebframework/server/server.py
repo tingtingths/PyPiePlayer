@@ -1,5 +1,6 @@
 import inspect
 import os
+import mimetypes
 
 from simplewebframework.framework.filter import RequestFilter
 from simplewebframework.framework.handler import *
@@ -24,6 +25,7 @@ class Server():
         self.cert = cert
         self.key = key
         self.multiprocess = multiprocess
+        mimetypes.init()
 
     def register(self, handler):
         if isinstance(handler, RequestWorker):  # worker

@@ -24,7 +24,7 @@ class WebInterface(RequestWorker):
                 self.artroot = self.webroot + "tmp" + os.path.sep + "album_art" + os.path.sep
                 self.streamroot = self.webroot + "tmp" + os.path.sep + "stream" + os.path.sep
 
-    def do_GET(self, req):  # req - (clientAddress, headers, method, path, query)
+    def do_GET(self, web_root, req):  # req - (clientAddress, headers, method, path, query)
         cmd = req.query["req"]
 
         if cmd == "id":

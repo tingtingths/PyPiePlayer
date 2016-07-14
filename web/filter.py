@@ -9,7 +9,7 @@ class WebFilter(RequestFilter):
         self.user = user
         self.passhash = passhash
 
-    def filter(self, req):
+    def filter(self, web_root, req):
         auth_ok = False
         headers = req.headers
 
