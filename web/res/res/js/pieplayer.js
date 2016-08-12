@@ -236,6 +236,8 @@ function shuffleAll() {
     shuffle = true;
     unshuffled = [];
 
+    document.getElementById("shuffleBtn").setAttribute("style", "");
+
     for (albumartist in artists) {
         if (albumartist != "#count") {
             for (album in artists[albumartist]) {
