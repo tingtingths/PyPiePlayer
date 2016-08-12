@@ -173,8 +173,11 @@ function playPause() {
     if (playerStatus == 2) {
         player.pause();
     } else if (playerStatus == 1 || playerStatus == 0) {
-        if (currentSong["title"] != null)
+        if (currentSong["title"] != null) {
             player.play();
+        } else {
+            shuffleAll();
+        }
     }
 }
 
