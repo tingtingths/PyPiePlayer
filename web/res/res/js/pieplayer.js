@@ -3,9 +3,10 @@ var interval;
 var refreshRate = 500; //ms
 var lyric = false;
 var artworkFormat = ".jpg";
-var prevList = [];
 var currentSong = {"artist" : null, "album" : null, "title" : null, "albumartist" : null};
 var playlist = [];
+var unshuffled = [];
+var idx = 0; // current song pointer to playlist
 var shuffle = true;
 var vol = 1;
 
@@ -20,8 +21,13 @@ var artists; // library
 var previous_selected_artist; //String
 var selected_artist; //html element
 
+EPlayerStatus = {
+    STOP : 0,
+    PAUSE : 1,
+    PLAYING : 2
+}
 var player;
-var playerStatus = 0; //0 = stop, 1 = pause, 2 = playing
+var playerStatus = EPlayerStatus.STOP;
 
 window.onload = function() {
     document.getElementById("progress").addEventListener('click', function(event) {
@@ -142,37 +148,26 @@ function updatePos() {
 
 function nextTrack() {
     if (playlist.length > 0) {
-        var idx = shuffle ? Math.floor(Math.random() * playlist.length) : 0;
+        idx++;
         var song = playlist[idx];
-        prevList.push(song);
         getAudioStream(song[0], song[1], song[2].title, song[2].artist);
-        playlist.splice(idx, 1);
     }
 }
 
 function backTrack() {
-    var pos = player.currentTime;
+    if (idx > 0) {
+        var pos = player.currentTime;
 
-    // prev song
-    if (pos <= 3) {
-        playlist.unshift(prevList.pop());
-        playlist.unshift(prevList.pop());
-        shuffle = false;
+        // play previous song if played for less than 3 sec, else reset
+        (pos <= 3) ? idx -= 2 : idx -= 1;
         nextTrack();
-        shuffle = true;
-    } else { // reset song
-        var lastSong = prevList.pop();
-        playlist.unshift(lastSong);
-        shuffle = false;
-        nextTrack();
-        shuffle = true;
     }
 }
 
 function playPause() {
-    if (playerStatus == 2) {
+    if (playerStatus == EPlayerStatus.PLAYING) {
         player.pause();
-    } else if (playerStatus == 1 || playerStatus == 0) {
+    } else if (playerStatus == EPlayerStatus.PAUSE || playerStatus == EPlayerStatus.STOP) {
         if (currentSong["title"] != null) {
             player.play();
         } else {
@@ -194,26 +189,34 @@ function setProgress(event) {
 }
 
 function toggleShuffle() {
-    if (shuffle)
+    var song = playlist[idx];
+
+    if (shuffle) { // already shuffle, disable it
         document.getElementById("shuffleBtn").setAttribute("style", "-webkit-filter: invert(50%)");
-    else
+
+        playlist = unshuffled.slice();
+        idx = playlist.indexOf(song);
+    } else {
         document.getElementById("shuffleBtn").setAttribute("style", "");
 
+        playlist.shuffle();
+        idx = playlist.indexOf(song);
+    }
     shuffle = !shuffle;
 }
 
-function setPlayerState(state) {
-    if (playerStatus != state) {
-        if (state == 0) {
-            playerStatus = state;
+function setPlayerState(status) {
+    if (playerStatus != status) {
+        if (status == 0) {
+            playerStatus = status;
             document.getElementById("playPauseBtn").src = "./res/image/" + playBtn;
         }
-        if (state == 1) {
-            playerStatus = state;
+        if (status == 1) {
+            playerStatus = status;
             document.getElementById("playPauseBtn").src = "./res/image/" + playBtn;
         }
-        if (state == 2) {
-            playerStatus = state;
+        if (status == 2) {
+            playerStatus = status;
             document.getElementById("playPauseBtn").src = "./res/image/" + pauseBtn;
         }
     }
@@ -231,7 +234,7 @@ function notifySongChange() {
 
 function shuffleAll() {
     shuffle = true;
-    playlist = [];
+    unshuffled = [];
 
     for (albumartist in artists) {
         if (albumartist != "#count") {
@@ -239,50 +242,62 @@ function shuffleAll() {
                 if (album != "#count") {
                     for (i in artists[albumartist][album]) {
                         var title = artists[albumartist][album][i];
-                        playlist.push([albumartist, album, title]);
+                        unshuffled.push([albumartist, album, title]);
                     }
                 }
             }
         }
     }
 
-    playerStatus = 2;
+    playlist = unshuffled.slice(); // by value (string)
+    playlist.shuffle();
+    playerStatus = EPlayerStatus.PLAYING;
+    idx = -1;
     nextTrack();
 }
 
 function playArtist(albumartist) {
-    playlist = [];
+    idx = -1;
+    unshuffled = [];
 
     for (album in artists[albumartist]) {
         if (album != "#count") {
             for (i in artists[albumartist][album]) {
                 var title = artists[albumartist][album][i]
-                playlist.push([albumartist, album, title]);
+                unshuffled.push([albumartist, album, title]);
             }
         }
     }
 
-    playerStatus = 2;
+    playlist = unshuffled.slice(); // by value (string)
+    if (shuffle) playlist.shuffle();
+
+    playerStatus = EPlayerStatus.PLAYING;
     nextTrack();
 }
 
 function playAlbum(albumartist, album) {
-    playlist = [];
+    idx = -1;
+    unshuffled = [];
 
     for (i in artists[albumartist][album]) {
         var title = artists[albumartist][album][i];
-        playlist.push([albumartist, album, title]);
+        unshuffled.push([albumartist, album, title]);
     }
 
-    playerStatus = 2;
+    playlist = unshuffled.slice(); // by value (string)
+    if (shuffle) playlist.shuffle();
+
+    playerStatus = EPlayerStatus.PLAYING;
     nextTrack();
 }
 
 function playSingle(albumartist, album, title) {
+    idx = -1;
     playlist = [];
 
     playlist.push([albumartist, album, title]);
-    playerStatus = 2;
+    playerStatus = EPlayerStatus.PLAYING;
     nextTrack();
 }
 
@@ -342,7 +357,7 @@ function getAudioStream(albumartist, album, title, artist) {
             currentSong["album"] = album;
             currentSong["title"] = title;
             notifySongChange();
-            if (playerStatus == 2) {
+            if (playerStatus == EPlayerStatus.PLAYING) {
                 player.play();
                 document.getElementById("playPauseBtn").src = "./res/image/" + pauseBtn;
             }
@@ -601,7 +616,7 @@ function pad(num) { //pad number with leading 0
     }
 }
 
-String.prototype.hexEncode = function(){
+String.prototype.hexEncode = function() {
     var hex, i;
 
     var result = "";
@@ -611,4 +626,17 @@ String.prototype.hexEncode = function(){
     }
 
     return result;
+}
+
+Array.prototype.shuffle = function() {
+    var i, j;
+    var tmp;
+
+    for (i = this.length; i; i--) {
+        j = Math.floor(Math.random() * i);
+        // swap
+        tmp = this[i - 1];
+        this[i - 1] = this[j];
+        this[j] = tmp;
+    }
 }
