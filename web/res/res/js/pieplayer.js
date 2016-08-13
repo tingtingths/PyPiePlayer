@@ -183,9 +183,9 @@ function setVolume(vol) {
 function setProgress(event) {
     var bar = document.getElementById("progress");
     var x = event.pageX - bar.offsetLeft;
-    var value = x * bar.max / bar.offsetWidth;
+    var value = parseInt(x * bar.max / bar.offsetWidth);
 
-    player.currentTime = value;
+    player.currentTime = value; // not working with chrome ???
 }
 
 function toggleShuffle() {
@@ -207,15 +207,15 @@ function toggleShuffle() {
 
 function setPlayerState(status) {
     if (playerStatus != status) {
-        if (status == 0) {
+        if (status == EPlayerStatus.STOP) {
             playerStatus = status;
             document.getElementById("playPauseBtn").src = "./res/image/" + playBtn;
         }
-        if (status == 1) {
+        if (status == EPlayerStatus.PAUSE) {
             playerStatus = status;
             document.getElementById("playPauseBtn").src = "./res/image/" + playBtn;
         }
-        if (status == 2) {
+        if (status == EPlayerStatus.PLAYING) {
             playerStatus = status;
             document.getElementById("playPauseBtn").src = "./res/image/" + pauseBtn;
         }
@@ -329,8 +329,7 @@ function getArtwork(albumartist, album) { //album title
         isArtTop = true;
     }
 
-    var req = new XMLHttpRequest();
-    req.onreadystatechange = function() {
+    ajax("GET", "api?req=cover&id=" + id + "&now=" + new Date(), true, function(req) {
         if (req.readyState == 4 && req.status == 200) {
             var path = req.responseText;
             if (isArtTop) {
@@ -339,15 +338,13 @@ function getArtwork(albumartist, album) { //album title
                 document.getElementById("artTop").src = path;
             }
         }
-    }
-    req.open("GET", "api?req=cover&id=" + id + "&now=" + new Date(), true);
-    req.send();
+    });
 }
 
 function getAudioStream(albumartist, album, title, artist) {
     var id = getId(albumartist, album, title);
-    var req = new XMLHttpRequest();
-    req.onreadystatechange = function() {
+
+    ajax("GET", "api?req=stream&id=" + id + "&now=" + new Date(), true, function(req) {
         if (req.readyState == 4 && req.status == 200) {
             var path = req.responseText;
             player.src = path;
@@ -364,16 +361,13 @@ function getAudioStream(albumartist, album, title, artist) {
                 document.getElementById("playPauseBtn").src = "./res/image/" + pauseBtn;
             }
         }
-    }
-    req.open("GET", "api?req=stream&id=" + id + "&now=" + new Date(), true);
-    req.send();
+    });
 }
 
 function getList1() {
     var defer = $.Deferred();
-    var req = new XMLHttpRequest();
 
-    req.onreadystatechange = function() {
+    ajax("GET", "api?req=json&now=" + new Date(), true, function(req) {
         if (req.readyState == 4 && req.status == 200) { //XMLHttpRequest 'DONE' and 'SUCCESS'
             var json = req.responseText;
             artists = JSON.parse(json);
@@ -442,10 +436,7 @@ function getList1() {
             }
             list_1.style.height = "100%";
         }
-    }
-
-    req.open("GET", "api?req=json&now=" + new Date(), true);
-    req.send();
+    });
 }
 
 function getList2(keyword) {
@@ -533,16 +524,14 @@ function getList2(keyword) {
                         }
                     }
 
-                    var req = new XMLHttpRequest();
-                    req.onreadystatechange = function() {
+                    var id = getIdOfFirstSong(artist, album);
+
+                    ajax("GET", "api?req=cover&id=" + id + "&now=" + new Date(), true, function(req) {
                         if (req.readyState == 4 && req.status == 200) {
                             var path = req.responseText;
                             imgs[count].src = path;
                         }
-                    }
-                    var id = getIdOfFirstSong(artist, album);
-                    req.open("GET", "api?req=cover&id=" + id + "&now=" + new Date(), true);
-                    req.send();
+                    });
                 })(count, artist, album);
                 count += 1;
             }
@@ -576,11 +565,12 @@ function enableLyrics() {
 }
 
 function getLyrics(albumartist, album, title) {
-    var req = new XMLHttpRequest();
     var id  = getId(albumartist, album, title);
     var box = document.getElementById("lyricbox");
 
-    req.onreadystatechange = function() {
+    box.innerHTML = "";
+    box.innerHTML = "Downloading..."
+    ajax("GET", "api?req=lyrics&id=" + id + "&now=" + new Date(), true, function(req) {
         if (req.readyState == 4 && req.status == 200) {
             box.innerHTML = "";
             var lines = JSON.parse(req.responseText);
@@ -589,11 +579,7 @@ function getLyrics(albumartist, album, title) {
                 box.innerHTML += line + "<br>";
             }
         }
-    }
-    box.innerHTML = "";
-    box.innerHTML = "Downloading..."
-    req.open("GET", "api?req=lyrics&id=" + id + "&now=" + new Date(), true);
-    req.send();
+    });
 }
 
 function getId(albumartist, album, title) {
@@ -616,6 +602,14 @@ function pad(num) { //pad number with leading 0
     } else {
         return num;
     }
+}
+
+function ajax(method, url, async, callback) {
+    var req = new XMLHttpRequest();
+
+    req.onreadystatechange = function() { callback(req) };
+    req.open(method, url, async);
+    req.send();
 }
 
 String.prototype.hexEncode = function() {
