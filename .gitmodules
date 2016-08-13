@@ -1,0 +1,3 @@
+[submodule "PySimpleHttpFramework"]
+	path = PySimpleHttpFramework
+	url = git@github.com:tingtingths/PySimpleHttpFramework.git

@@ -149,8 +149,8 @@ function updatePos() {
 function nextTrack() {
     if (playlist.length > 0) {
         idx++;
-        var song = playlist[idx];
-        getAudioStream(song[0], song[1], song[2].title, song[2].artist);
+        var ele = playlist[idx];
+        getAudioStream(ele[0], ele[1], ele[2].title, ele[2].artist);
     }
 }
 
@@ -242,10 +242,9 @@ function shuffleAll() {
         if (albumartist != "#count") {
             for (album in artists[albumartist]) {
                 if (album != "#count") {
-                    for (i in artists[albumartist][album]) {
-                        var title = artists[albumartist][album][i];
-                        unshuffled.push([albumartist, album, title]);
-                    }
+                    artists[albumartist][album].forEach(function(e, i, a) {
+                        unshuffled.push([albumartist, album, e]);
+                    });
                 }
             }
         }
@@ -265,8 +264,8 @@ function playArtist(albumartist) {
     for (album in artists[albumartist]) {
         if (album != "#count") {
             for (i in artists[albumartist][album]) {
-                var title = artists[albumartist][album][i]
-                unshuffled.push([albumartist, album, title]);
+                var song = artists[albumartist][album][i]
+                unshuffled.push([albumartist, album, song]);
             }
         }
     }
@@ -283,8 +282,8 @@ function playAlbum(albumartist, album) {
     unshuffled = [];
 
     for (i in artists[albumartist][album]) {
-        var title = artists[albumartist][album][i];
-        unshuffled.push([albumartist, album, title]);
+        var song = artists[albumartist][album][i];
+        unshuffled.push([albumartist, album, song]);
     }
 
     playlist = unshuffled.slice(); // by value (string)
@@ -294,11 +293,11 @@ function playAlbum(albumartist, album) {
     nextTrack();
 }
 
-function playSingle(albumartist, album, title) {
+function playSingle(albumartist, album, song) {
     idx = -1;
     playlist = [];
 
-    playlist.push([albumartist, album, title]);
+    playlist.push([albumartist, album, song]);
     playerStatus = EPlayerStatus.PLAYING;
     nextTrack();
 }
