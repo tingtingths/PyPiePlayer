@@ -371,7 +371,7 @@ function getList1() {
             shuffle_div.artist = "Shuffle All";
             shuffle_div.onclick = function() {
                 if (selected_artist) {
-                    selected_artist.style.background = "#f6f6f6";
+                    selected_artist.style.background = "";
                 }
                 this.style.background = "#c0dade";
                 selected_artist = this;
@@ -401,7 +401,7 @@ function getList1() {
                         div.className = "artists";
                         div.onclick = function() {
                             if (selected_artist) {
-                                    selected_artist.style.background = "#f6f6f6";
+                                    selected_artist.style.background = "";
                             }
                             this.style.background = "#c0dade";
                             selected_artist = this;
