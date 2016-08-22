@@ -3,9 +3,10 @@ var interval;
 var refreshRate = 500; //ms
 var lyric = false;
 var artworkFormat = ".jpg";
-var prevList = [];
 var currentSong = {"artist" : null, "album" : null, "title" : null, "albumartist" : null};
 var playlist = [];
+var unshuffled = [];
+var idx = 0; // current song pointer to playlist
 var shuffle = true;
 var vol = 1;
 
@@ -20,8 +21,13 @@ var artists; // library
 var previous_selected_artist; //String
 var selected_artist; //html element
 
+EPlayerStatus = {
+    STOP : 0,
+    PAUSE : 1,
+    PLAYING : 2
+}
 var player;
-var playerStatus = 0; //0 = stop, 1 = pause, 2 = playing
+var playerStatus = EPlayerStatus.STOP;
 
 window.onload = function() {
     document.getElementById("progress").addEventListener('click', function(event) {
@@ -142,37 +148,26 @@ function updatePos() {
 
 function nextTrack() {
     if (playlist.length > 0) {
-        var idx = shuffle ? Math.floor(Math.random() * playlist.length) : 0;
-        var song = playlist[idx];
-        prevList.push(song);
-        getAudioStream(song[0], song[1], song[2].title, song[2].artist);
-        playlist.splice(idx, 1);
+        idx++;
+        var ele = playlist[idx];
+        getAudioStream(ele[0], ele[1], ele[2].title, ele[2].artist);
     }
 }
 
 function backTrack() {
-    var pos = player.currentTime;
+    if (idx > 0) {
+        var pos = player.currentTime;
 
-    // prev song
-    if (pos <= 3) {
-        playlist.unshift(prevList.pop());
-        playlist.unshift(prevList.pop());
-        shuffle = false;
+        // play previous song if played for less than 3 sec, else reset
+        (pos <= 3) ? idx -= 2 : idx -= 1;
         nextTrack();
-        shuffle = true;
-    } else { // reset song
-        var lastSong = prevList.pop();
-        playlist.unshift(lastSong);
-        shuffle = false;
-        nextTrack();
-        shuffle = true;
     }
 }
 
 function playPause() {
-    if (playerStatus == 2) {
+    if (playerStatus == EPlayerStatus.PLAYING) {
         player.pause();
-    } else if (playerStatus == 1 || playerStatus == 0) {
+    } else if (playerStatus == EPlayerStatus.PAUSE || playerStatus == EPlayerStatus.STOP) {
         if (currentSong["title"] != null) {
             player.play();
         } else {
@@ -188,32 +183,40 @@ function setVolume(vol) {
 function setProgress(event) {
     var bar = document.getElementById("progress");
     var x = event.pageX - bar.offsetLeft;
-    var value = x * bar.max / bar.offsetWidth;
+    var value = parseInt(x * bar.max / bar.offsetWidth);
 
-    player.currentTime = value;
+    player.currentTime = value; // not working with chrome ???
 }
 
 function toggleShuffle() {
-    if (shuffle)
+    var song = playlist[idx];
+
+    if (shuffle) { // already shuffle, disable it
         document.getElementById("shuffleBtn").setAttribute("style", "-webkit-filter: invert(50%)");
-    else
+
+        playlist = unshuffled.slice();
+        idx = playlist.indexOf(song);
+    } else {
         document.getElementById("shuffleBtn").setAttribute("style", "");
 
+        playlist.shuffle();
+        idx = playlist.indexOf(song);
+    }
     shuffle = !shuffle;
 }
 
-function setPlayerState(state) {
-    if (playerStatus != state) {
-        if (state == 0) {
-            playerStatus = state;
+function setPlayerState(status) {
+    if (playerStatus != status) {
+        if (status == EPlayerStatus.STOP) {
+            playerStatus = status;
             document.getElementById("playPauseBtn").src = "./res/image/" + playBtn;
         }
-        if (state == 1) {
-            playerStatus = state;
+        if (status == EPlayerStatus.PAUSE) {
+            playerStatus = status;
             document.getElementById("playPauseBtn").src = "./res/image/" + playBtn;
         }
-        if (state == 2) {
-            playerStatus = state;
+        if (status == EPlayerStatus.PLAYING) {
+            playerStatus = status;
             document.getElementById("playPauseBtn").src = "./res/image/" + pauseBtn;
         }
     }
@@ -231,58 +234,71 @@ function notifySongChange() {
 
 function shuffleAll() {
     shuffle = true;
-    playlist = [];
+    unshuffled = [];
+
+    document.getElementById("shuffleBtn").setAttribute("style", "");
 
     for (albumartist in artists) {
         if (albumartist != "#count") {
             for (album in artists[albumartist]) {
                 if (album != "#count") {
-                    for (i in artists[albumartist][album]) {
-                        var title = artists[albumartist][album][i];
-                        playlist.push([albumartist, album, title]);
-                    }
+                    artists[albumartist][album].forEach(function(e, i, a) {
+                        unshuffled.push([albumartist, album, e]);
+                    });
                 }
             }
         }
     }
 
-    playerStatus = 2;
+    playlist = unshuffled.slice(); // by value (string)
+    playlist.shuffle();
+    playerStatus = EPlayerStatus.PLAYING;
+    idx = -1;
     nextTrack();
 }
 
 function playArtist(albumartist) {
-    playlist = [];
+    idx = -1;
+    unshuffled = [];
 
     for (album in artists[albumartist]) {
         if (album != "#count") {
             for (i in artists[albumartist][album]) {
-                var title = artists[albumartist][album][i]
-                playlist.push([albumartist, album, title]);
+                var song = artists[albumartist][album][i]
+                unshuffled.push([albumartist, album, song]);
             }
         }
     }
 
-    playerStatus = 2;
+    playlist = unshuffled.slice(); // by value (string)
+    if (shuffle) playlist.shuffle();
+
+    playerStatus = EPlayerStatus.PLAYING;
     nextTrack();
 }
 
 function playAlbum(albumartist, album) {
-    playlist = [];
+    idx = -1;
+    unshuffled = [];
 
     for (i in artists[albumartist][album]) {
-        var title = artists[albumartist][album][i];
-        playlist.push([albumartist, album, title]);
+        var song = artists[albumartist][album][i];
+        unshuffled.push([albumartist, album, song]);
     }
 
-    playerStatus = 2;
+    playlist = unshuffled.slice(); // by value (string)
+    if (shuffle) playlist.shuffle();
+
+    playerStatus = EPlayerStatus.PLAYING;
     nextTrack();
 }
 
-function playSingle(albumartist, album, title) {
+function playSingle(albumartist, album, song) {
+    idx = -1;
     playlist = [];
 
-    playlist.push([albumartist, album, title]);
-    playerStatus = 2;
+    playlist.push([albumartist, album, song]);
+    playerStatus = EPlayerStatus.PLAYING;
     nextTrack();
 }
 
@@ -312,8 +328,7 @@ function getArtwork(albumartist, album) { //album title
         isArtTop = true;
     }
 
-    var req = new XMLHttpRequest();
-    req.onreadystatechange = function() {
+    ajax("GET", "api?req=cover&id=" + id + "&now=" + new Date(), true, function(req) {
         if (req.readyState == 4 && req.status == 200) {
             var path = req.responseText;
             if (isArtTop) {
@@ -322,15 +337,13 @@ function getArtwork(albumartist, album) { //album title
                 document.getElementById("artTop").src = path;
             }
         }
-    }
-    req.open("GET", "api?req=cover&id=" + id + "&now=" + new Date(), true);
-    req.send();
+    });
 }
 
 function getAudioStream(albumartist, album, title, artist) {
     var id = getId(albumartist, album, title);
-    var req = new XMLHttpRequest();
-    req.onreadystatechange = function() {
+
+    ajax("GET", "api?req=stream&id=" + id + "&now=" + new Date(), true, function(req) {
         if (req.readyState == 4 && req.status == 200) {
             var path = req.responseText;
             player.src = path;
@@ -342,21 +355,18 @@ function getAudioStream(albumartist, album, title, artist) {
             currentSong["album"] = album;
             currentSong["title"] = title;
             notifySongChange();
-            if (playerStatus == 2) {
+            if (playerStatus == EPlayerStatus.PLAYING) {
                 player.play();
                 document.getElementById("playPauseBtn").src = "./res/image/" + pauseBtn;
             }
         }
-    }
-    req.open("GET", "api?req=stream&id=" + id + "&now=" + new Date(), true);
-    req.send();
+    });
 }
 
 function getList1() {
     var defer = $.Deferred();
-    var req = new XMLHttpRequest();
 
-    req.onreadystatechange = function() {
+    ajax("GET", "api?req=json&now=" + new Date(), true, function(req) {
         if (req.readyState == 4 && req.status == 200) { //XMLHttpRequest 'DONE' and 'SUCCESS'
             var json = req.responseText;
             artists = JSON.parse(json);
@@ -425,10 +435,7 @@ function getList1() {
             }
             list_1.style.height = "100%";
         }
-    }
-
-    req.open("GET", "api?req=json&now=" + new Date(), true);
-    req.send();
+    });
 }
 
 function getList2(keyword) {
@@ -516,16 +523,14 @@ function getList2(keyword) {
                         }
                     }
 
-                    var req = new XMLHttpRequest();
-                    req.onreadystatechange = function() {
+                    var id = getIdOfFirstSong(artist, album);
+
+                    ajax("GET", "api?req=cover&id=" + id + "&now=" + new Date(), true, function(req) {
                         if (req.readyState == 4 && req.status == 200) {
                             var path = req.responseText;
                             imgs[count].src = path;
                         }
-                    }
-                    var id = getIdOfFirstSong(artist, album);
-                    req.open("GET", "api?req=cover&id=" + id + "&now=" + new Date(), true);
-                    req.send();
+                    });
                 })(count, artist, album);
                 count += 1;
             }
@@ -559,11 +564,12 @@ function enableLyrics() {
 }
 
 function getLyrics(albumartist, album, title) {
-    var req = new XMLHttpRequest();
     var id  = getId(albumartist, album, title);
     var box = document.getElementById("lyricbox");
 
-    req.onreadystatechange = function() {
+    box.innerHTML = "";
+    box.innerHTML = "Downloading..."
+    ajax("GET", "api?req=lyrics&id=" + id + "&now=" + new Date(), true, function(req) {
         if (req.readyState == 4 && req.status == 200) {
             box.innerHTML = "";
             var lines = JSON.parse(req.responseText);
@@ -572,11 +578,7 @@ function getLyrics(albumartist, album, title) {
                 box.innerHTML += line + "<br>";
             }
         }
-    }
-    box.innerHTML = "";
-    box.innerHTML = "Downloading..."
-    req.open("GET", "api?req=lyrics&id=" + id + "&now=" + new Date(), true);
-    req.send();
+    });
 }
 
 function getId(albumartist, album, title) {
@@ -601,7 +603,15 @@ function pad(num) { //pad number with leading 0
     }
 }
 
-String.prototype.hexEncode = function(){
+function ajax(method, url, async, callback) {
+    var req = new XMLHttpRequest();
+
+    req.onreadystatechange = function() { callback(req) };
+    req.open(method, url, async);
+    req.send();
+}
+
+String.prototype.hexEncode = function() {
     var hex, i;
 
     var result = "";
@@ -611,4 +621,17 @@ String.prototype.hexEncode = function(){
     }
 
     return result;
+}
+
+Array.prototype.shuffle = function() {
+    var i, j;
+    var tmp;
+
+    for (i = this.length; i; i--) {
+        j = Math.floor(Math.random() * i);
+        // swap
+        tmp = this[i - 1];
+        this[i - 1] = this[j];
+        this[j] = tmp;
+    }
 }

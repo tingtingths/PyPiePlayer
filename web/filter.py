@@ -1,7 +1,7 @@
 import base64
 import hashlib
 from log import wlog
-from simplewebframework.framework.filter import RequestFilter
+from PySimpleHttpFramework.simplewebframework.framework.filter import RequestFilter
 
 
 class WebFilter(RequestFilter):
@@ -12,12 +12,11 @@ class WebFilter(RequestFilter):
     def filter(self, web_root, req):
         auth_ok = False
         headers = req.headers
-
-        if "Authorization" not in headers:
+        if "authorization" not in headers:
             return False, 401, "Unauthorized access...", [("WWW-Authenticate", "Basic realm=\"PiePlayer\"")]
         else:
             try:
-                auth = base64.b64decode(headers["Authorization"].split(" ")[1]).decode("utf8").split(":")
+                auth = base64.b64decode(headers["authorization"].split(" ")[1]).decode("utf8").split(":")
                 auth_ok = True if auth[0] == self.user and self.sha256(auth[1]) == self.passhash else False
             except Exception as e:
                 wlog("EXCEPTION...")

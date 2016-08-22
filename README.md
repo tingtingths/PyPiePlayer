@@ -1,13 +1,8 @@
 # PyPiePlayer
-A web based music player.
-
-PiePlayer daemon - Python 3  
-Web interface - js + html
+A web-based music player written in Python and Javascript.
 
 ## Requirements
-Python3  
-Pillow - py package  
-Mutagen - py package
+    pip install mutagen pillow
 
 ## Run
 Modify settings in pie.py, then
