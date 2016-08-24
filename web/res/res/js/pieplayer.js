@@ -500,7 +500,7 @@ function getList2(keyword) {
                     imgs[count].className = "albums_artwork";
 
                     // for each song in album
-                    for (i in display_albums[album]) {
+                    for (var i = 0; i < display_albums[album].length; i++) {
                         (function(i) {
                             var track = display_albums[album][i];
                             var a = document.createElement("a");
