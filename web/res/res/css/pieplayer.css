@@ -1,11 +1,19 @@
 @font-face {
-	font-family: OpenSans-Regular;
+	font-family: OpenSans;
 	src: url('../font/OpenSans-Regular.ttf');
 }
 @font-face {
 	font-family: OpenSans-Light;
 	src: url('../font/OpenSans-Light.ttf');
 }
+@font-face {
+    font-family: 'Noto Sans TC';
+    font-style: normal;
+    font-weight: 400;
+    src: url(//fonts.gstatic.com/ea/notosanstc/v1/NotoSansTC-Regular.woff2) format('woff2'),
+        url(//fonts.gstatic.com/ea/notosanstc/v1/NotoSansTC-Regular.woff) format('woff'),
+        url(//fonts.gstatic.com/ea/notosanstc/v1/NotoSansTC-Regular.otf) format('opentype');
+ }
 ::-webkit-scrollbar {
 	width: 4px;
 }
@@ -13,7 +21,7 @@
 	background-color: #DA6E17;
 }
 body {
-	font-family: OpenSans-Regular, Arial;
+	font-family: OpenSans, 'Noto Sans TC', Arial;
 	text-shadow: rgba(0,0,0,.01) 0 0 1px;
 	margin: 0;
 	background-color: #c0dade;
