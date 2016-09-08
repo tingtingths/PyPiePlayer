@@ -11,9 +11,9 @@
     font-style: normal;
     font-weight: 400;
     src: url(//fonts.gstatic.com/ea/notosanstc/v1/NotoSansTC-Regular.woff2) format('woff2'),
-        url(//fonts.gstatic.com/ea/notosanstc/v1/NotoSansTC-Regular.woff) format('woff'),
-        url(//fonts.gstatic.com/ea/notosanstc/v1/NotoSansTC-Regular.otf) format('opentype');
- }
+         url(//fonts.gstatic.com/ea/notosanstc/v1/NotoSansTC-Regular.woff) format('woff'),
+         url(//fonts.gstatic.com/ea/notosanstc/v1/NotoSansTC-Regular.otf) format('opentype');
+}
 ::-webkit-scrollbar {
 	width: 4px;
 }
@@ -266,7 +266,7 @@ progress::-webkit-progress-value {
 	color: #DA6E17;
 }
 .artists_name {
-	font-family: OpenSans-Light;
+	font-family: OpenSans-Light, 'Noto Sans TC', Arial;
 	color: black;
 	font-size: 1em;
 }
