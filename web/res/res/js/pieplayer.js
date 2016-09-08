@@ -199,7 +199,7 @@ function toggleShuffle() {
     } else {
         document.getElementById("shuffleBtn").setAttribute("style", "");
 
-        playlist.shuffle();
+        playlist = shuffleArray(playlist);
         idx = playlist.indexOf(song);
     }
     shuffle = !shuffle;
@@ -251,7 +251,7 @@ function shuffleAll() {
     }
 
     playlist = unshuffled.slice(); // by value (string)
-    playlist.shuffle();
+    playlist = shuffleArray(playlist);
     playerStatus = EPlayerStatus.PLAYING;
     idx = -1;
     nextTrack();
@@ -271,7 +271,7 @@ function playArtist(albumartist) {
     }
 
     playlist = unshuffled.slice(); // by value (string)
-    if (shuffle) playlist.shuffle();
+    if (shuffle) playlist = shuffleArray(playlist);
 
     playerStatus = EPlayerStatus.PLAYING;
     nextTrack();
@@ -287,7 +287,7 @@ function playAlbum(albumartist, album) {
     }
 
     playlist = unshuffled.slice(); // by value (string)
-    if (shuffle) playlist.shuffle();
+    if (shuffle) playlist = shuffleArray(playlist);
 
     playerStatus = EPlayerStatus.PLAYING;
     nextTrack();
@@ -621,17 +621,4 @@ String.prototype.hexEncode = function() {
     }
 
     return result;
-}
-
-Array.prototype.shuffle = function() {
-    var i, j;
-    var tmp;
-
-    for (i = this.length; i; i--) {
-        j = Math.floor(Math.random() * i);
-        // swap
-        tmp = this[i - 1];
-        this[i - 1] = this[j];
-        this[j] = tmp;
-    }
 }
