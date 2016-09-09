@@ -1,7 +1,6 @@
 import base64
 import hashlib
 from log import wlog
-from PySimpleHttpFramework.simplewebframework.framework.filter import RequestFilter
 
 
 class WebFilter(RequestFilter):

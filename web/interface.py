@@ -8,7 +8,6 @@ import web
 import player.grab_lyrics
 from player.library import Library
 from player.track import Track
-from PySimpleHttpFramework.simplewebframework.framework.worker import RequestWorker
 
 
 class WebInterface(RequestWorker):
