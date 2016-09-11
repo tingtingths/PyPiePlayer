@@ -4,43 +4,36 @@ import inspect
 import os
 import json
 
-import web
 import player.grab_lyrics
-from player.library import Library
-from player.track import Track
+from flask import request
+from web import app
 
-
-class WebInterface(RequestWorker):
+class WebInterface():
     def __init__(self, lib):
         self.lib = lib
-        super(WebInterface, self).__init__("/api")
-        path = inspect.getfile(web)
+        path = lib.MEDIA_DIR
         suffix = "__init__.py"
-        if path.endswith(suffix):
-            path = path[:len(path) - len(suffix)]
-            if os.path.isdir(path) and os.path.exists(path):
-                self.webroot = path + "res" + os.path.sep
-                self.artroot = self.webroot + "tmp" + os.path.sep + "album_art" + os.path.sep
-                self.streamroot = self.webroot + "tmp" + os.path.sep + "stream" + os.path.sep
+        self.artroot = os.path.join(app.static_folder, "tmp", "album_art") + os.path.sep
+        self.streamroot = os.path.join(app.static_folder, "tmp", "stream") + os.path.sep
 
-    def do_GET(self, web_root, req):  # req - (clientAddress, headers, method, path, query)
-        cmd = req.query["req"]
+    def api(self):
+        cmd = request.args.get("req")
 
         if cmd == "id":
-            id = req.query["id"]
+            id = request.args.get("id")
             tag = self.lib.get_with_id(id).get_tag()
             artist = tag["artist"]
             title = tag["title"]
-            return 200, title + " - " + artist, []
+            return title + " - " + artist, 200
 
         if cmd == "json":
-            return 200, self.lib.get_json(), [("Content-type", "text/plain-text")]
+            return self.lib.get_json(), 200
 
         if cmd == "cover":
             if not os.path.exists(self.artroot):
                 os.makedirs(self.artroot, exist_ok=True)
 
-            id = req.query["id"]
+            id = request.args.get("id")
             filename = id
             # see if art exist
             art = glob.glob(self.artroot + filename + ".jpg")
@@ -59,14 +52,14 @@ class WebInterface(RequestWorker):
             else:
                 filename = os.path.basename(art[0])
 
-            return 200, "/tmp/album_art/" + filename, []
+            return "/tmp/album_art/" + filename, 200
 
         if cmd == "stream":
             if not os.path.exists(self.streamroot):
                 os.makedirs(self.streamroot, exist_ok=True)
             self.limitcache(self.streamroot, 4)
 
-            id = req.query["id"]
+            id = request.args.get("id")
 
             filename = id
             stream = glob.glob(self.streamroot + filename + "*")
@@ -78,22 +71,22 @@ class WebInterface(RequestWorker):
             else:
                 filename = os.path.basename(stream[0])
 
-            return 200, "/tmp/stream/" + filename, []
+            return "/tmp/stream/" + filename, 200
 
         if cmd == "lyrics":
-            id = req.query["id"]
+            id = request.args.get("id")
             tag = self.lib.get_with_id(id).get_tag()
             artist = tag["artist"]
             title = tag["title"]
             lines = player.grab_lyrics.grab(artist, title)
 
-            return 200, json.dumps(lines), []
+            return json.dumps(lines), 200
 
         if cmd == "cleancache":
             self.lib.reinit()
-            return 200, "okay", []
+            return "okay", 200
 
-        return 400, "", []
+        return "", 400
 
     def toHex(self, s):
         return binascii.hexlify(str.encode(s)).decode("utf-8")

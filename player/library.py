@@ -6,7 +6,6 @@ import shutil
 import mutagen
 from collections import namedtuple
 from player.track import Track
-from web import res
 
 
 class Library():
