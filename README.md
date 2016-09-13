@@ -2,7 +2,7 @@
 A web-based music player written in Python and Javascript.
 
 ## Requirements
-    pip install mutagen pillow
+    pip install mutagen pillow flask
 
 ## Run
 Modify settings in pie.py, then
