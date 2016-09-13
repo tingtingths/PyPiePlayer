@@ -155,9 +155,11 @@ class Library():
                                     _artist = self.lib[artist][album][title].artist # track artist
                                     track = self.lib[artist][album][title].track_obj
                                     if toFile:
-                                        s += "[\"" + title + "\",\"" + track.path.replace("\\", "/") + "\",\"" + id + "\", \"" + _artist + "\"],"
+                                        s += '["{0}","{1}","{2}","{3}","{4}"],'.format(title, track.path.replace("\\", "/"), id, _artist, track.get_tag()["track_num"])
+                                        #s += "[\"" + title + "\",\"" + track.path.replace("\\", "/") + "\",\"" + id + "\", \"" + _artist + "\"],"
                                     else:
-                                        s += "{\"title\":\"" + title + "\", \"id\":\"" + id + "\", \"artist\":\"" + _artist + "\"},"
+                                        s += '{{"title":"{0}","id":"{1}","artist":"{2}","track_num":"{3}"}},'.format(title, id, _artist, track.get_tag()["track_num"])
+                                        #s += "{\"title\":\"" + title + "\", \"id\":\"" + id + "\", \"artist\":\"" + _artist + "\"},"
                             s = s.rstrip(",")
                             s += "],"  # album
                     s = s.rstrip(",")

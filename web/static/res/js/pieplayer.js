@@ -499,6 +499,13 @@ function getList2(keyword) {
 
                     imgs[count].className = "albums_artwork";
 
+                    // sort song with track_num
+                    display_albums[album].sort(function(a, b) {
+                        var numA = a["track_num"].split("/")[0];
+                        var numB = b["track_num"].split("/")[0];
+                        return numA - numB;
+                    });
+
                     // for each song in album
                     for (var i = 0; i < display_albums[album].length; i++) {
                         (function(i) {

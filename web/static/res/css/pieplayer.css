@@ -103,6 +103,7 @@ progress::-webkit-progress-value {
 	color: white;
 }
 #lyricbox {
+    font-family: OpenSans-Light, "Noto Sans TC", Arial;
 	max-height: 35em;
 	max-width: 350px;
 	font-size: 0.9em;
