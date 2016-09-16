@@ -10,3 +10,4 @@ log
 library
 *.bat
 web/static/tmp
+config.py
