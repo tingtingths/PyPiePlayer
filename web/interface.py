@@ -52,7 +52,7 @@ class WebInterface():
             else:
                 filename = os.path.basename(art[0])
 
-            return "/tmp/album_art/" + filename, 200
+            return "tmp/album_art/" + filename, 200
 
         if cmd == "stream":
             if not os.path.exists(self.streamroot):
@@ -71,7 +71,7 @@ class WebInterface():
             else:
                 filename = os.path.basename(stream[0])
 
-            return "/tmp/stream/" + filename, 200
+            return "tmp/stream/" + filename, 200
 
         if cmd == "lyrics":
             id = request.args.get("id")
