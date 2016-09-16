@@ -7,7 +7,6 @@ from web.filter import auth_deco
 from web.interface import WebInterface
 from web import app
 from config import *
-print("u: " + username)
 
 from flask import send_from_directory
 
