@@ -343,13 +343,14 @@ function getArtwork(albumartist, album) { //album title
 function getAudioStream(albumartist, album, title, artist) {
     var id = getId(albumartist, album, title);
 
+    if (albumartist != currentSong["albumartist"] || album != currentSong["album"])
+        getArtwork(albumartist, album);
+
     ajax("GET", "api?req=stream&id=" + id + "&now=" + new Date(), true, function(req) {
         if (req.readyState == 4 && req.status == 200) {
             var path = req.responseText;
             player.src = path;
             player.load();
-            if (albumartist != currentSong["albumartist"] || album != currentSong["album"])
-                getArtwork(albumartist, album);
             currentSong["albumartist"] = albumartist;
             currentSong["artist"] = artist;
             currentSong["album"] = album;
