@@ -372,6 +372,25 @@ function getList1() {
             var json = req.responseText;
             artists = JSON.parse(json);
 
+            // preload artworks
+            for (artist in artists) {
+                if (artist != "#count") {
+                    var albums = artists[artist];
+                    for (album in albums) {
+                        if (album != "#count") {
+                            var id = getIdOfFirstSong(artist, album);
+                            ajax("GET", "api?req=cover&id=" + id + "&now=" + new Date(), true, function(req) {
+                                if (req.readyState == 4 && req.status == 200) {
+                                    var path = req.responseText;
+                                    var img = new Image();
+                                    img.src = path;
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+
             // prepare html elements -------------------------------
             var list = document.getElementById("list_1");
             list.innerHTML = "";

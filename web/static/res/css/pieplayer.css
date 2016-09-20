@@ -255,6 +255,7 @@ progress::-webkit-progress-value {
 }
 #list_1:hover {
 	overflow-y: scroll;
+    overflow-x: hidden;
 }
 .artists {
 	transition: background-color 0.5s ease;
