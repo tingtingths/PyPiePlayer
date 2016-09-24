@@ -302,7 +302,7 @@ function playSingle(albumartist, album, song) {
     nextTrack();
 }
 
-function getArtwork(albumartist, album) { //album title
+function getArtwork(albumartist, album, url = "") { //album title
     var id = getIdOfFirstSong(albumartist, album);
     var imageUrl = "";
 
@@ -328,26 +328,41 @@ function getArtwork(albumartist, album) { //album title
         isArtTop = true;
     }
 
-    ajax("GET", "api?req=cover&id=" + id + "&now=" + new Date(), true, function(req) {
-        if (req.readyState == 4 && req.status == 200) {
-            var path = req.responseText;
-            if (isArtTop) {
-                document.getElementById("artBottom").src = path;
-            } else {
-                document.getElementById("artTop").src = path;
+    if (url == "") {
+        ajax("GET", "api?req=cover&id=" + id + "&now=" + new Date(), true, function(req) {
+            if (req.readyState == 4 && req.status == 200) {
+                var path = req.responseText;
+                if (isArtTop) {
+                    document.getElementById("artBottom").src = path;
+                } else {
+                    document.getElementById("artTop").src = path;
+                }
             }
+        });
+    } else {
+        if (isArtTop) {
+            document.getElementById("artBottom").src = url;
+        } else {
+            document.getElementById("artTop").src = url;
         }
-    });
+    }
 }
 
 function getAudioStream(albumartist, album, title, artist) {
     var id = getId(albumartist, album, title);
+    var artUrl = "";
 
-    if (albumartist != currentSong["albumartist"] || album != currentSong["album"])
-        getArtwork(albumartist, album);
+
+    ajax("GET", "api?req=cover&id=" + id + "&now=" + new Date(), true, function(req) {
+        if (req.readyState == 4 && req.status == 200) {
+            artUrl = req.responseText;
+        }
+    });
 
     ajax("GET", "api?req=stream&id=" + id + "&now=" + new Date(), true, function(req) {
         if (req.readyState == 4 && req.status == 200) {
+            if (albumartist != currentSong["albumartist"] || album != currentSong["album"])
+                getArtwork(albumartist, album, artUrl);
             var path = req.responseText;
             player.src = path;
             player.load();
