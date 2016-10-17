@@ -1,6 +1,6 @@
 //background
 var bkg_min = 1;
-var bkg_max = 9; //how many pictures
+var bkg_max = 7; //how many pictures
 var current = Math.floor((Math.random() * bkg_max) + bkg_min);
 var bkg_refresh_rate = 480000; //8 mins
 var isBkgTop = false;
