@@ -541,20 +541,28 @@ function getList2(keyword) {
                         return numA - numB;
                     });
 
+                    div_songs = document.createElement("ul");
+                    div_songs.className = "songs_list";
+                    div_right.appendChild(div_songs);
+
                     // for each song in album
                     for (var i = 0; i < display_albums[album].length; i++) {
                         (function(i) {
                             var track = display_albums[album][i];
+                            var li = document.createElement("li");
                             var a = document.createElement("a");
                             a.className = "songs_title";
                             a.appendChild(document.createTextNode(track.title));
                             a.onclick = function() {
                                 playSingle(artist, album, track);
                             }
-                            div_right.appendChild(a);
+                            li.appendChild(a);
+                            div_songs.appendChild(li);
+                            /*
                             if (i != display_albums[album].length - 1) {
-                                div_right.appendChild(document.createElement("br"));
+                                div_songs.appendChild(document.createElement("br"));
                             }
+                            */
                         })(i);
                     };
 

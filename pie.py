@@ -29,10 +29,10 @@ def index():
 @auth_deco(username, password_hash)
 def server_static(name):
     return send_from_directory(app.static_folder, name)
-    
+
 if __name__ == "__main__":
     #app.run(host="0.0.0.0", port=PORT, threaded=True, debug=DEBUG) # no ssl
     app.run(host="0.0.0.0", port=PORT, threaded=True, ssl_context=(cert_file, pkey_file), debug=DEBUG)
-    
+
     # wsgi
     #app.run()

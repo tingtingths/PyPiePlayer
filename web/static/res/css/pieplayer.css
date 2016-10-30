@@ -293,6 +293,9 @@ progress::-webkit-progress-value {
 #list_2 a:hover {
 	color: #DA6E17;
 }
+.songs_list a {
+    padding: 0 0 8px 0;
+}
 .albums {
 	margin-bottom: 40px;
 	overflow: auto;
@@ -309,10 +312,15 @@ progress::-webkit-progress-value {
 }
 .albums_right {
 	padding: 15px;
-	overflow:hidden;
+	overflow: hidden;
 }
-.songs_title {
-	font-size: 0.8em;
+.songs_list {
+    list-style-type: none;
+    font-size: 0.8em;
+    padding: 0;
+    column-count: 2;
+    column-width: 200px;
+    column-gap: 0;
 }
 .albums_title {
 	font-size: 1.1em;
