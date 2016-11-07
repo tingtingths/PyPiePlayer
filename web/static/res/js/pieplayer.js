@@ -162,6 +162,10 @@ function backTrack() {
         (pos <= 3) ? idx -= 2 : idx -= 1;
         nextTrack();
     }
+    if (idx == 0) { // always reset if it is the first song
+        idx = -1;
+        nextTrack();
+    }
 }
 
 function playPause() {
