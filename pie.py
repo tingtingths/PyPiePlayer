@@ -13,7 +13,6 @@ from flask import send_from_directory
 suffix = "__init__.py"
 lib = Library(music_path, "web/static/res/tmp")  # scan directory
 web = WebInterface(lib)
-users = {"user" : "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8"}
 
 @app.route("/api")
 @auth_deco(users)
