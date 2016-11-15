@@ -38,9 +38,12 @@ def auth_deco(userpass_dict, cookie_auth=False):
             if auth_ok:
                 resp = func(*args, **kwargs)
                 if not auth_by == "cookie" and cookie_auth:
-                    token = gen_token()
-                    save_token(token)
-                    resp.set_cookie("token", token)
+                    @after_this_request
+                    def put_cookie(response):
+                        token = gen_token()
+                        save_token(token)
+                        response.set_cookie("token", token)
+                        return response
                 return resp
             else:
                 return "Unauthorized access...", 401
