@@ -55,16 +55,21 @@ def _sha256(s):
 
 def load_token():
     global tokens, token_loaded
-    with open(token_file, "r") as f:
-        tokens = f.read().split(",")
+    try:
+        with open(token_file, "r") as f:
+            tokens = f.read().split(",")
+    except FileNotFoundError:
+        open(token_file, "w").close()
     token_loaded = True
 
 def save_token(token):
+    global tokens
     with open(token_file, "a") as f:
         if len(tokens) == 0:
             f.write(token)
         else:
             f.write("," + token)
+    tokens.append(token)
 
 def gen_token():
     return uuid.uuid4().hex
