@@ -4,7 +4,7 @@ import uuid
 from functools import wraps
 
 from web import app
-from flask import request, Response
+from flask import request, Response, after_this_request
 
 tokens = []
 token_file = "tokens"
