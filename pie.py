@@ -11,7 +11,7 @@ from config import *
 from flask import send_from_directory
 
 suffix = "__init__.py"
-lib = Library(music_path, "web/static/res/tmp")  # scan directory
+lib = Library(music_path, os.path.join(app.static_folder, "tmp"))  # scan directory
 web = WebInterface(lib)
 
 @app.route("/api")

@@ -18,14 +18,13 @@ class Library():
     Song = namedtuple("Song", ["id", "artist", "track_obj"])
 
     def __init__(self, media_dir, cache_dir):
-        self.MEDIA_DIR = media_dir
-        self.CACHE_DIR = cache_dir
+        self.MEDIA_DIR = os.path.abspath(media_dir)
+        self.CACHE_DIR = os.path.abspath(cache_dir)
         # remove previous cache
-        #print(self.CACHE_DIR)
-        if os.path.exists(self.CACHE_DIR):
-            shutil.rmtree(self.CACHE_DIR)
-            print("remove cache")
         if not self.loadlib():
+            if os.path.exists(self.CACHE_DIR):
+                shutil.rmtree(self.CACHE_DIR)
+                print("remove cache")
             print("scanning...")
             self.scan(self.MEDIA_DIR)
             if len(self.lib) > 0:
