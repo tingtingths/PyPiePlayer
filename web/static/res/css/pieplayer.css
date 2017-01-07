@@ -14,6 +14,21 @@
          url(//fonts.gstatic.com/ea/notosanstc/v1/NotoSansTC-Regular.woff) format('woff'),
          url(//fonts.gstatic.com/ea/notosanstc/v1/NotoSansTC-Regular.otf) format('opentype');
 }
+:root {
+    --base-artwork-size: 200px;
+    --mobile-artwork-size: 400px;
+
+    --base-font-size: 100%;
+
+    --base-list1-width: 20%;
+
+    --base-artist-name-font-size: 1em;
+    --base-artist-detail-font-size: 0.5em;
+
+    --base-left-album-size: 12em;
+
+    --base-nav-btn-size: 8px;
+}
 ::-webkit-scrollbar {
 	width: 4px;
 }
@@ -22,6 +37,7 @@
 }
 body {
 	font-family: OpenSans, 'Noto Sans TC', Arial;
+    font-size: var(--base-font-size);
 	text-shadow: rgba(0,0,0,.01) 0 0 1px;
 	margin: 0;
 	background-color: #c0dade;
@@ -147,8 +163,8 @@ progress::-webkit-progress-value {
 }
 #artworkWrapper {
 	position: relative;
-	width: 200px;
-	height: 200px;
+	height: var(--base-artwork-size);
+    width: var(--base-artwork-size);
 	margin: auto;
 	margin-bottom: 30px;
 	padding: 0;
@@ -233,20 +249,9 @@ progress::-webkit-progress-value {
 #section_playlist {
 	background-color: white;
 }
-#shuffle_div {
-	padding: 2px;
-}
-#shuffle_div a {
-	font-weight: bold;
-}
-#shuffle_p {
-	color: rgb(120,120,120);
-	display: inline;
-	font-size: 0.5em;
-}
 #list_1 {
 	float: left;
-	width: 20%;
+	width: var(--base-list1-width);
 	overflow-y:hidden;
 	background-color: #f6f6f6;
 }
@@ -257,6 +262,23 @@ progress::-webkit-progress-value {
 	overflow-y: scroll;
     overflow-x: hidden;
 }
+#list_1 p {
+    color: rgb(120,120,120);
+	display: inline;
+    font-size: var(--base-artist-detail-font-size);
+}
+#list_1 a {
+	font-family: OpenSans-Light, 'Noto Sans TC', Arial;
+	color: black;
+    font-size: var(--base-artist-name-font-size);
+}
+#shuffle_div {
+	padding: 2px;
+}
+#shuffle_div a {
+	font-weight: bold;
+    color: rgb(255,120,120);
+}
 .artists {
 	transition: background-color 0.5s ease;
 	padding: 4px;
@@ -266,16 +288,6 @@ progress::-webkit-progress-value {
 }
 .artists a:hover {
 	color: #DA6E17;
-}
-.artists_name {
-	font-family: OpenSans-Light, 'Noto Sans TC', Arial;
-	color: black;
-	font-size: 1em;
-}
-.artists_detail {
-	color: rgb(120,120,120);
-	display: inline;
-	font-size: 0.5em;
 }
 .artists_detail:hover {
 	cursor: default;
@@ -299,7 +311,7 @@ progress::-webkit-progress-value {
 }
 .albums_left {
 	float: left;
-	width: 12em;
+    width: var(--base-left-album-size);
 	padding: 10px;
 }
 .albums_artwork {
@@ -340,11 +352,52 @@ progress::-webkit-progress-value {
 .fp-slidesNav ul li a span {
     top: 2px;
     left: 2px;
-    width: 8px;
-    height: 8px;
+    width: var(--base-nav-btn-size);
+    height: var(--base-nav-btn-size);
     border: 2px solid #DA6E17;
     background: rgba(0, 0, 0, 0);
     border-radius: 50%;
     position: absolute;
     z-index: 1;
+}
+
+/* mobile */
+
+@media only screen
+  and (max-device-width: 736px)
+  and (orientation: portrait) {
+    body {
+        font-size: calc(var(--base-font-size) * 2);
+    }
+
+    #artworkWrapper {
+        width: calc(var(--base-artwork-size) * 1.8);
+        height: calc(var(--base-artwork-size) * 1.8);
+    }
+
+    #volumeSlider {
+        display: none;
+    }
+
+    #list_1 {
+    	width: calc(var(--base-list1-width) * 1.8);
+    }
+
+    .artists_name {
+        font-size: calc(var(--base-artist-name-font-size) * 1.2);
+    }
+    #list_1 p {
+        font-size: calc(var(--base-artist-detail-font-size) * 1.5);
+    }
+
+    .albums_left {
+        width: calc(var(--base-left-album-size) / 4);
+    }
+
+    #fp-nav ul li a span,
+    .fp-slidesNav ul li a span {
+        width: calc(var(--base-nav-btn-size) * 2);
+        height: calc(var(--base-nav-btn-size) * 2);
+        top: -15px;
+    }
 }
