@@ -57,13 +57,14 @@ class WebInterface():
         if cmd == "stream":
             if not os.path.exists(self.streamroot):
                 os.makedirs(self.streamroot, exist_ok=True)
-            self.limitcache(self.streamroot, 4)
 
             id = request.args.get("id")
 
             filename = id
             stream = glob.glob(self.streamroot + filename + "*")
             if len(stream) == 0:
+                # remove old item if only item not found
+                self.limitcache(self.streamroot, 4)
                 track = self.lib.get_with_id(id)
                 b, type = track.get_bytes()
                 open(self.streamroot + filename + "." + type, "wb").write(b)

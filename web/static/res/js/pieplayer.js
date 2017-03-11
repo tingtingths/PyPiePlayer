@@ -155,13 +155,15 @@ function nextTrack() {
 }
 
 function backTrack() {
-    if (idx > 0) {
-        var pos = player.currentTime;
+    var pos = player.currentTime;
 
-        // play previous song if played for less than 3 sec, else reset
+    if (idx > 0) {
+        // play previous song if played for <= 3 sec, else reset
         (pos <= 3) ? idx -= 2 : idx -= 1;
-        nextTrack();
+    } else {
+        idx -= 1;
     }
+    nextTrack();
 }
 
 function playPause() {
