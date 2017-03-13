@@ -110,15 +110,16 @@ window.onload = function() {
 
 // key listening
 window.onkeyup = function(e) {
-    if (e.keyCode == 32 || e.keyCode == 179) { // whitespace or media play/pause
+    var playPauseKeys = [32, 75, 179]; // space, media key
+    var nextSongKeys = [76, 176]; // L, media key
+    var perviousSongKeys = [74, 177];
+
+    if (playPauseKeys.includes(e.keyCode)) // whitespace or media play/pause
         playPause();
-    }
-    if (e.keyCode == 177) { // media back
+    if (perviousSongKeys.includes(e.keyCode)) // media back
         backTrack();
-    }
-    if (e.keyCode == 176) { // media next
+    if (nextSongKeys.includes(e.keyCode)) // media next
         nextTrack();
-    }
 };
 
 function hoverProgressText(ele) {
