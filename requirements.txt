@@ -1,3 +1,4 @@
+pyinotify
 mutagen
 pillow
 flask

@@ -10,6 +10,8 @@ from player.data.track import Track
 
 class Library:
     file_type = [".m4a", ".mp3", ".flac", ".aac"]
+    watch_mask = pyinotify.IN_CREATE | pyinotify.IN_DELETE
+    library_file = "library_json"
 
     def __init__(self, library_path):
         self.cache = None
@@ -22,18 +24,42 @@ class Library:
         self.setup_watchdog()
 
     def setup_library(self):
-        self.cache = self.scan(self.library_path)
+        if os.path.exists(self.library_file):
+            self.cache = self.unmarshall(self.library_file)
+        else:
+            self.cache = self.scan(self.library_path)
         self._update_json()
 
     def _update_json(self):
-        self.library_json = json.dumps({"cached_time": round(time.time()), "library": self.cache.lib},
+        self.library_json = json.dumps({JSON_KEY_CACHE_TIME: round(time.time()), JSON_KEY_LIBRARY: self.cache.lib},
                                        default=lambda o: o.get_tag() if type(o) is Track else str(o))
+
+        self.marshall()
+
+    def marshall(self):
+        _json = json.dumps(self.cache.get_tracks(), default=lambda o: o.marshall())
+        with open(self.library_file, "w") as outF:
+            outF.write(_json)
+
+    def unmarshall(self, f):
+        cache = LibraryCache()
+        print("Loading from file")
+
+        with open(f, "r") as inF:
+            _json = inF.read()
+            tracks = json.loads(_json)  # [track obj]
+            for track_json in tracks:
+                track = Track(marshalled_json=track_json)
+                cache.put_track(track)
+
+        print("Found {0} song".format(cache.get_track_count()))
+        return cache
 
     def setup_watchdog(self):
         self.wm = pyinotify.WatchManager()
-        self.notifier = pyinotify.Notifier(self.wm, default_proc_fun=self.watchdog)
-        self.wm.add_watch(self.library_path, 768)
-        self.notifier.loop()
+        self.notifier = pyinotify.ThreadedNotifier(self.wm, default_proc_fun=self.watchdog)
+        self.wm.add_watch(self.library_path, self.watch_mask, rec=True)
+        self.notifier.start()
 
     def scan(self, path):
         cache = LibraryCache()  # {artist, {album, {track}}}
@@ -165,3 +191,6 @@ class LibraryCache:
 
     def to_json(self):
         return json.dumps(self.lib, default=lambda o: o.get_tag() if type(o) is Track else str(o))
+
+    def get_tracks(self):
+        return list(self.id_dict.values())
