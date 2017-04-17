@@ -1,7 +1,7 @@
 import io
 import json
-import uuid
 import os
+import uuid
 
 import mutagen
 from PIL import Image
@@ -18,10 +18,13 @@ class Track:
     track_num = None
     mimetype_dict = {".m4a": "audio/mp4", ".mp3": "audio/mpeg", ".flac": "audio/flac", ".acc": "audio/acc"}
 
-    def __init__(self, path):
-        self.id = uuid.uuid4().hex.replace("-", "")[:12]
-        self.path = path
-        self.inited = False
+    def __init__(self, path=None, marshalled_json=None):
+        if path:
+            self.id = uuid.uuid4().hex.replace("-", "")[:12]
+            self.path = path
+            self.inited = False
+        elif marshalled_json:
+            self.unmarshall(marshalled_json)
 
     def get_mimetype(self):
         root, ext = os.path.splitext(self.path)
@@ -93,3 +96,17 @@ class Track:
 
     def to_json(self):
         return json.dumps(self.get_tag())
+
+    def marshall(self):
+        return json.dumps((self.id, self.path, self.artist, self.album_artist, self.album, self.title, self.track_num))
+
+    def unmarshall(self, json_str):
+        lst = json.loads(json_str)
+        self.id = lst[0]
+        self.path = lst[1]
+        self.artist = lst[2]
+        self.album_artist = lst[3]
+        self.album = lst[4]
+        self.title = lst[5]
+        self.track_num = lst[6]
+        self.inited = True
