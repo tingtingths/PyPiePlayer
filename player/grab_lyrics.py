@@ -1,11 +1,12 @@
-from urllib import request as req, parse
-from bs4 import BeautifulSoup
 import json
+from urllib import request as req, parse
+
+from bs4 import BeautifulSoup
 
 
-def grab(artist, title):
+def grab_lyric(artist, title):
     url = "http://lyrics.wikia.com/api.php?"
-    param = {"action" : "lyrics", "fmt" : "realjson", "artist" : artist, "song" : title}
+    param = {"action": "lyrics", "fmt": "realjson", "artist": artist, "song": title}
 
     json_str = req.urlopen(url + parse.urlencode(param)).read().decode("utf-8")
     decoded = json.loads(json_str.split(" = ")[-1])
@@ -15,10 +16,11 @@ def grab(artist, title):
     else:
         return None
 
+
 def parse_lyric_wikia(html):
     soup = BeautifulSoup(html, "html.parser")
 
-    lyricbox = soup.find("div", attrs={"class" : "lyricbox"})
+    lyricbox = soup.find("div", attrs={"class": "lyricbox"})
     for script in lyricbox.find_all("script"):
         script.decompose()
     return lyricbox.get_text("\n", strip=True).split("\n")
