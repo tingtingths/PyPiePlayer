@@ -37,7 +37,7 @@ class PlayerController:
         return flask.send_file(artwork, mimetype="image/jpeg")
 
     def get_track_bytes(self, track_id):
-        track = self.lib.get_tracks(track_id)
+        track = self.lib.get_track(track_id)
         if track is None:
             flask.abort(404)
         return flask.send_file(track.get_file(), mimetype=track.get_mimetype())
