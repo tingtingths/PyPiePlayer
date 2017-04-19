@@ -14,6 +14,16 @@ const DAY = HOUR * 24;
 
 const SHUFFLE_ALL_ARTIST = "shuffle_all";
 
+var isLyricOn = false;
+var isArtTop = false;
+
+var player;
+var playerStatus = 1;
+var State = {
+    PLAYING: 0,
+    PAUSE: 1
+};
+
 window.onload = function() {
     init();
 
@@ -78,22 +88,39 @@ window.onload = function() {
     }, 10000); // ten sec
 };
 
-var player;
-var control = {
-    next: function (play) {
-        setCurrentTrack(playlistItr.next().value);
-        if (play)
-            control.resume()
-    },
-    back: function () {
+function nextTrack(play) {
+    if (playlistItr.hasNext()) {
+        setCurrentTrack(playlistItr.next());
+        if (playerStatus === State.PLAYING || play)
+            playTrack();
+    }
+}
 
-    },
-    pause: function () {
+function backTrack() {
+    if (playlistItr.hasPrevious()) {
+        setCurrentTrack(playlistItr.back());
+        if (playerStatus === State.PLAYING)
+            playTrack();
+    }
+}
 
-    },
-    resume: function () {
-        console.log(player);
-        player.play()
+function playTrack() {
+    player.play();
+}
+
+function pauseTrack() {
+    player.pause();
+}
+
+function playPause() {
+    if (playerStatus === State.PLAYING) {
+        pauseTrack();
+    } else if (playerStatus === State.PAUSE) {
+        if (playlist.length === 0) {
+            buildPlaylistAndPlay();
+        } else {
+            playTrack();
+        }
     }
 }
 
@@ -103,31 +130,71 @@ function setCurrentTrack(track) {
     document.getElementById("album").innerHTML = track.album;
     document.title = track.title + " - " + track.artist;
 
-    /*
-    if (lyric)
+    if (isLyricOn)
         getLyrics(currentSong["albumartist"], currentSong["album"], currentSong["title"]);
-    */
 
-    player.src = "/song/" + track.id + "/stream";
+        player.src = "/song/" + track.id + "/stream";
     player.load();
+
+    setPlayerArtwork("/" + track.artist + "/" + track.album + "/artwork");
 }
 
 function setVolume(vol) {
     player.volume = vol/100;
-    console.log(player);
+    document.getElementById("volumeSlider").value = vol;
+}
+
+function setPlayerArtwork(src) { //album title
+    if (isArtTop) {
+        document.getElementById("artTop").src = src;
+        document.getElementById("artTop").onload = function() { //wait untill the image is loaded
+            document.getElementById("artTop").style.opacity = "1";
+        };
+        isArtTop = false;
+    } else {
+        document.getElementById("artBottom").src = src;
+        document.getElementById("artBottom").onload = function() {
+            document.getElementById("artTop").style.opacity = "0";
+        };
+        isArtTop = true;
+    }
 }
 
 function init() {
     var library_json = "";
     player = document.getElementById("player");
-    console.log(player.volume);
+
+    player.onended = function() {
+        nextTrack();
+    };
+    player.onpause = function() {
+        playerStatus = State.PAUSE;
+        document.getElementById("playPauseBtn").src = "./res/image/playNew.png";
+    };
+    player.onplay = function() {
+        playerStatus = State.PLAYING;
+        document.getElementById("playPauseBtn").src = "./res/image/pauseNew.png";
+    };
+
+    setVolume(100);
+
     ajax("GET", "/library", true, function(req) {
-        if (req.readyState == 4 && req.status == 200) {
+        if (req.readyState === 4 && req.status === 200) {
             library_json = req.responseText;
             setupLibrary(library_json);
             constructArtistList();
+
+            document.getElementById("list_1").style.height = "100%";
+            document.getElementById("list_2").style.height = "100%";
         }
     });
+}
+
+function hoverProgressText(ele) {
+    document.getElementById("progressText").style.opacity = "1";
+    setTimeout(function() {
+        document.getElementById("progressText").style.opacity = "0";
+    }, 2500);
 }
 
 function setupLibrary(json) {
@@ -150,7 +217,6 @@ function setupLibrary(json) {
 }
 
 function buildPlaylistAndPlay(artist, album, track_id) {
-    console.log(artist + " - " + album + " - " + track_id);
     playlist = [];
 
     if (track_id) { // one song only
@@ -171,8 +237,12 @@ function buildPlaylistAndPlay(artist, album, track_id) {
         playlist = Object.values(tracks);
     }
 
-    playlistItr = iterator(playlist);
-    control.next(true);
+    // TODO remove force shuffle
+    playlist = shuffleArray(playlist);
+
+    playlistItr = playlistIterator(playlist);
+    setCurrentTrack(playlistItr.now());
+    playTrack();
 }
 
 function constructArtistList() {
@@ -180,10 +250,10 @@ function constructArtistList() {
 
     artistList.appendChild(buildShuffleListItem());
 
-    for (artist in library) {
+    for (var artist in library) {
         var artistSongCount = 0;
         var albums = library[artist];
-        for (album in albums) {
+        for (var album in albums) {
             artistSongCount += Object.keys(library[artist][album]).length;
         }
         artistList.appendChild(buildArtistListItem(artist, artistSongCount));
@@ -191,20 +261,20 @@ function constructArtistList() {
 }
 
 function constructAlbumList(artist) {
-    if (selectedArtistDOM != artist) {
+    if (selectedArtistDOM !== artist) {
         var albumList = document.getElementById("list_2");
         nodeCleanChild(albumList);
         var artistAlbums = {};
 
-        if (artist == SHUFFLE_ALL_ARTIST) {
+        if (artist === SHUFFLE_ALL_ARTIST) {
             for (artist in library)
                 artistAlbums[artist] = getArtistAlbums(artist);
         } else {
             artistAlbums[artist] = getArtistAlbums(artist);
         }
 
-        for (_artist in artistAlbums) {
-            for (album in artistAlbums[_artist])
+        for (var _artist in artistAlbums) {
+            for (var album in artistAlbums[_artist])
                 albumList.appendChild(buildAlbumItem(_artist, artistAlbums[_artist][album]));
         }
     }
@@ -322,7 +392,7 @@ function buildAlbumItem(artist, album) {
 function getArtistAlbums(artist) {
     var albums = [];
 
-    for (album in library[artist])
+    for (var album in library[artist])
         albums.push(album);
 
     return albums;
@@ -350,57 +420,4 @@ function getArtistTracksIds(artist) {
 
 function getTrack(trackId) {
     return tracks[trackId];
-}
-
-function nodeCleanChild(node) {
-    while (node.firstChild) {
-        node.removeChild(node.firstChild);
-    }
-}
-
-function ajax(method, url, async, callback) {
-    var req = new XMLHttpRequest();
-
-    req.onreadystatechange = function() { callback(req) };
-    req.open(method, url, async);
-    req.send();
-}
-
-function timeAgo(time) {
-    var diff = Math.floor(new Date().getTime() / 1000) - time;
-
-    var d = Math.floor(diff / DAY);
-    diff -= d * DAY;
-    var h = Math.floor(diff / HOUR);
-    diff -= h * HOUR;
-    var m = Math.floor(diff / MINUTE);
-
-    var s = "";
-    s += (d == 0) ? "" : d + " days ";
-    s += (h == 0) ? "" : h + " hours ";
-    s += m + " minutes ago";
-
-    return s;
-}
-
-function iterator(array) {
-    var idx = 0;
-
-    return {
-        next: function() {
-            return idx < array.length ?
-                {value: array[idx++], done: false} :
-                {done: true};
-        },
-        back: function() {
-            return idx >= 0 ? {value: array[idx--], done: false} :
-                {done: true};
-        },
-        hasNext: function() {
-            return idx < array.length;
-        },
-        hasPervious: function () {
-            return idx > 0;
-        }
-    };
 }
