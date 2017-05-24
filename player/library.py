@@ -85,6 +85,9 @@ class Library:
     def get_artwork_bytes(self, artist, album):
         return self.cache.get_artwork_bytes(artist, album)
 
+    def get_artwork_bytes_with_id(self, track_id):
+        return self.cache.get_artwork_bytes_with_id(track_id)
+
     def watchdog(self, event):
         if os.path.splitext(event.name)[1] in self.file_type:
             if event.maskname == "IN_CREATE":
@@ -139,8 +142,15 @@ class LibraryCache:
             return None
         return self.id_dict[track_id]
 
+    # TODO get_artwork_bytes with track id
     def get_artwork_bytes(self, artist, album):
         track = list(self.get_album_tracks(artist, album).values())[0]
+        if track.get_tag()[TAG_ID] not in self.art_cache:
+            self.art_cache[track.get_tag()[TAG_ID]] = track.get_artwork_bytes()[0]
+        return self.art_cache[track.get_tag()[TAG_ID]]
+
+    def get_artwork_bytes_with_id(self, track_id):
+        track = self.get_track_by_id(track_id)
         if track.get_tag()[TAG_ID] not in self.art_cache:
             self.art_cache[track.get_tag()[TAG_ID]] = track.get_artwork_bytes()[0]
         return self.art_cache[track.get_tag()[TAG_ID]]

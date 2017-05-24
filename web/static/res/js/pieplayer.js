@@ -3,10 +3,18 @@ var tracks = {};
 var songCount = 0;
 var cacheTime;
 var cacheTimeAgo;
+var shuffle = true;
+var isArtTop = true;
 
 var selectedArtistDOM;
 var playlistItr;
 var playlist = [];
+
+//btn name
+var playBtn = "playNew.png";
+var pauseBtn = "pauseNew.png";
+var nextBtn = "next.png";
+var prevBtn = "prev.png";
 
 const MINUTE = 60;
 const HOUR = MINUTE * 60;
@@ -16,6 +24,17 @@ const SHUFFLE_ALL_ARTIST = "shuffle_all";
 
 window.onload = function() {
     init();
+
+    player.onended = function() {
+        control.next();
+    };
+    player.onpause = function() {
+        document.getElementById("playPauseBtn").src = "./res/image/" + playBtn;
+    };
+    player.onplay = function() {
+        console.log("onplay");
+        document.getElementById("playPauseBtn").src = "./res/image/" + pauseBtn;
+    };
 
     $('#fullpage').fullpage({
         //Navigation
@@ -67,6 +86,12 @@ window.onload = function() {
         afterSlideLoad: function(anchorLink, index, slideAnchor, slideIndex){},
         onSlideLeave: function(anchorLink, index, slideIndex, direction){}
     });
+
+    document.getElementById("volumeSlider").value = 100;
+    var list_2 = document.getElementById("list_2");
+    list_2.width -= 4;
+    setVolume(document.getElementById("volumeSlider").value);
+
     changeBkg();
     setInterval(function() {
         changeBkg();
@@ -81,23 +106,35 @@ window.onload = function() {
 var player;
 var control = {
     next: function (play) {
+        if (!playlistItr.hasNext())
+            return null;
+        if (typeof play === "undefined" && !player.paused)
+            play = true;
+
         setCurrentTrack(playlistItr.next().value);
         if (play)
-            control.resume()
+            player.play();
     },
-    back: function () {
+    back: function (play) {
+        console.log(player.paused);
+        if (!playlistItr.hasPervious())
+            return null;
+        if (typeof play === "undefined" && !player.paused)
+            play = true;
 
+        setCurrentTrack(playlistItr.back().value);
+        if (play)
+            player.play();
     },
-    pause: function () {
-
-    },
-    resume: function () {
-        console.log(player);
-        player.play()
+    playPause: function () {
+        if (player.paused)
+            player.play();
+        else
+            player.pause();
     }
 }
 
-function setCurrentTrack(track) {
+    function setCurrentTrack(track) {
     document.getElementById("title").innerHTML = track.title;
     document.getElementById("artist").innerHTML = track.artist;
     document.getElementById("album").innerHTML = track.album;
@@ -110,11 +147,33 @@ function setCurrentTrack(track) {
 
     player.src = "/song/" + track.id + "/stream";
     player.load();
+
+    var imageUrl = "/" + track.id + "/artwork";
+    if (isArtTop) {
+        if (document.getElementById("artTop").src == imageUrl) { //if same
+            document.getElementById("artTop").style.opacity = "1";
+        } else {
+            document.getElementById("artTop").src = imageUrl;
+        }
+        document.getElementById("artTop").onload = function() { //wait untill the image is loaded
+            document.getElementById("artTop").style.opacity = "1";
+        };
+        isArtTop = false;
+    } else {
+        if (document.getElementById("artTop").src == imageUrl) {
+            document.getElementById("artTop").style.opacity = "0";
+        } else {
+            document.getElementById("artBottom").src = imageUrl;
+        }
+        document.getElementById("artBottom").onload = function() {
+            document.getElementById("artTop").style.opacity = "0";
+        };
+        isArtTop = true;
+    }
 }
 
 function setVolume(vol) {
     player.volume = vol/100;
-    console.log(player);
 }
 
 function init() {
@@ -168,10 +227,14 @@ function buildPlaylistAndPlay(artist, album, track_id) {
             playlist.push(getTrack(id));
         }
     } else { // shuffle
-        playlist = Object.values(tracks);
+        playlist = shuffleArray(Object.values(tracks));
     }
 
-    playlistItr = iterator(playlist);
+    if (shuffle)
+        playlist = shuffleArray(playlist);
+
+    playlistItr = pointer(playlist);
+    playlistItr.idx(-1);
     control.next(true);
 }
 
@@ -188,6 +251,8 @@ function constructArtistList() {
         }
         artistList.appendChild(buildArtistListItem(artist, artistSongCount));
     }
+
+    artistList.style.height = "100%";
 }
 
 function constructAlbumList(artist) {
@@ -208,6 +273,7 @@ function constructAlbumList(artist) {
                 albumList.appendChild(buildAlbumItem(_artist, artistAlbums[_artist][album]));
         }
     }
+    albumList.style.height = "100%";
 }
 
 function buildShuffleListItem() {
@@ -284,7 +350,7 @@ function buildAlbumItem(artist, album) {
     a.appendChild(document.createTextNode(album));
     a.onclick = function() { buildPlaylistAndPlay(artist, album); }
     img = document.createElement("img");
-    img.src = "/" + artist + "/" + album + "/artwork";
+    img.src = "/" + tracks[0].id + "/artwork";
 
     div.appendChild(div_left);
     div.appendChild(div_right);
@@ -383,24 +449,77 @@ function timeAgo(time) {
     return s;
 }
 
+function shuffleArray(arr) {
+	var outArr = [];
+	var len = arr.length;
+
+	for (var i = 0; i < len; i++) {
+		var pick = Math.floor(Math.random() * arr.length);
+		outArr.push(arr[pick]);
+		arr.splice(pick, 1);
+	};
+
+	return outArr;
+}
+
 function iterator(array) {
     var idx = 0;
 
     return {
+        current: function() {
+            return {value: array[idx]};
+        },
         next: function() {
             return idx < array.length ?
                 {value: array[idx++], done: false} :
-                {done: true};
+                {value: array[idx], done: true};
         },
         back: function() {
-            return idx >= 0 ? {value: array[idx--], done: false} :
-                {done: true};
+            return idx >= 0 ?
+                {value: array[--idx], done: false} :
+                {value: array[idx], done: true};
         },
         hasNext: function() {
             return idx < array.length;
         },
         hasPervious: function () {
             return idx > 0;
+        },
+        idx: function(newIdx) {
+            if (typeof newIdx !== "undefined")
+                idx = newIdx;
+            return idx;
+        }
+    };
+}
+
+function pointer(array) {
+    var idx = 0;
+
+    return {
+        current: function() {
+            return {value: array[idx]};
+        },
+        next: function() {
+            return idx < array.length ?
+                {value: array[++idx], done: false} :
+                {value: array[idx], done: true};
+        },
+        back: function() {
+            return idx >= 0 ?
+                {value: array[--idx], done: false} :
+                {value: array[idx], done: true};
+        },
+        hasNext: function() {
+            return idx < array.length;
+        },
+        hasPervious: function () {
+            return idx > 0;
+        },
+        idx: function(newIdx) {
+            if (typeof newIdx !== "undefined")
+                idx = newIdx;
+            return idx;
         }
     };
 }

@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 from flask import send_from_directory
 
 from config import *

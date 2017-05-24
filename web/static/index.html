@@ -51,9 +51,9 @@
                     <input id="volumeSlider" orient="vertical" onInput="setVolume(this.value)" type="range" max="100">
                 </div>
                 <form class="info" id="controlPanel">
-                    <img class="controlBtn" onclick="backTrack()" src="./res/image/prevNew.png">
-                    <img class="controlBtn" id="playPauseBtn" onclick="playPause()" src="./res/image/playNew.png">
-                    <img class="controlBtn" onclick="nextTrack()" src="./res/image/nextNew.png">
+                    <img class="controlBtn" onclick="control.back()" src="./res/image/prevNew.png">
+                    <img class="controlBtn" id="playPauseBtn" onclick="control.playPause()" src="./res/image/playNew.png">
+                    <img class="controlBtn" onclick="control.next()" src="./res/image/nextNew.png">
                 </form>
             </div>
             <div class="myFooter"><span onclick="changeBkg()">PiePlayer by Ting @ 2015</span></div>
