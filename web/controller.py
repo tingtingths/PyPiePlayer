@@ -1,7 +1,8 @@
 import io
+import os
 
 import flask
-import base64
+from flask import stream_with_context, Response
 
 from web import app
 from player.grab_lyrics import *
@@ -41,7 +42,9 @@ class PlayerController:
         track = self.lib.get_track(track_id)
         if track is None:
             flask.abort(404)
-        return flask.send_file(track.get_file(), mimetype=track.get_mimetype())
+        dirname = os.path.dirname(track.get_path())
+        basename = os.path.basename(track.get_path())
+        return flask.send_from_directory(dirname, basename)
 
     def get_track_lyric(self, track_id):
         track = self.lib.get_tracks(track_id)

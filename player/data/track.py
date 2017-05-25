@@ -74,6 +74,9 @@ class Track:
                 TAG_TRACK_NUM: self.track_num,
                 TAG_ALBUM_ARTIST: self.album_artist}
 
+    def get_path(self):
+        return self.path
+
     def get_file(self):
         return open(self.path, "rb")
 

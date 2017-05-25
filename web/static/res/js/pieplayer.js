@@ -168,7 +168,7 @@ var control = {
 }
 
 function setCurrentTrack(track) {
-    var imageUrl = "/" + track.id + "/artwork";
+    var imageUrl = track.id + "/artwork";
     if (isArtTop) {
         if (document.getElementById("artTop").src == imageUrl) { //if same
             document.getElementById("artTop").style.opacity = "1";
@@ -199,7 +199,7 @@ function setCurrentTrack(track) {
     if (isLyricOn)
         getLyrics(currentSong["albumartist"], currentSong["album"], currentSong["title"]);
 
-        player.src = "/song/" + track.id + "/stream";
+        player.src = "song/" + track.id + "/stream";
     player.load();
 
 }
@@ -269,7 +269,7 @@ function init() {
 
     setVolume(100);
 
-    ajax("GET", "/library", true, function(req) {
+    ajax("GET", "library", true, function(req) {
         if (req.readyState === 4 && req.status === 200) {
             library_json = req.responseText;
             setupLibrary(library_json);
@@ -454,7 +454,7 @@ function buildAlbumItem(artist, album) {
     a.appendChild(document.createTextNode(album));
     a.onclick = function() { buildPlaylistAndPlay(artist, album); }
     img = document.createElement("img");
-    img.src = "/" + tracks[0].id + "/artwork";
+    img.src = tracks[0].id + "/artwork";
 
     div.appendChild(div_left);
     div.appendChild(div_right);
