@@ -5,4 +5,4 @@ cert_file = ""
 pkey_file = ""
 library_path = ""
 PORT = 4343
-DEBUG = True
+DEBUG = False

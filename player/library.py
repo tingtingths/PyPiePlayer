@@ -10,7 +10,8 @@ from player.data.track import Track
 
 class Library:
     file_type = [".m4a", ".mp3", ".flac", ".aac"]
-    watch_mask = pyinotify.IN_CREATE | pyinotify.IN_DELETE
+    watch_mask = pyinotify.IN_CREATE | pyinotify.IN_DELETE | pyinotify.IN_MOVED_FROM \
+                 | pyinotify.IN_MOVED_TO | pyinotify.IN_MODIFY
     library_file = "library_json"
 
     def __init__(self, library_path):
@@ -23,8 +24,8 @@ class Library:
         self.setup_library()
         self.setup_watchdog()
 
-    def setup_library(self):
-        if os.path.exists(self.library_file):
+    def setup_library(self, ignore_json=False):
+        if os.path.exists(self.library_file) and not ignore_json:
             self.cache = self.unmarshall(self.library_file)
         else:
             self.cache = self.scan(self.library_path)
@@ -89,13 +90,37 @@ class Library:
         return self.cache.get_artwork_bytes_with_id(track_id)
 
     def watchdog(self, event):
-        if os.path.splitext(event.name)[1] in self.file_type:
-            if event.maskname == "IN_CREATE":
-                track = Track(os.path.abspath(event.pathname))
+        print("watchdog reload...")
+        self.setup_library(ignore_json=True)
+        """
+        if not event.pathname.startswith(self.library_path):
+            return None
+
+        todo_files = []
+        print(event)
+        if os.path.isdir(event.pathname):
+            for root, dirs, files in os.walk(event.pathname):
+                for file in files:
+                    print(file)
+                    if os.path.splitext(os.path.basename(file))[1] in self.file_type:
+                        file = os.path.abspath(os.path.join(root, file))
+                        files.append(file)
+        if os.path.isfile(event.pathname) and os.path.splitext(event.name)[1] in self.file_type:
+            files.append(event.pathname)
+
+        #print(todo_files)
+
+        if event.maskname in ["IN_CREATE", "IN_MOVED_TO", "IN_MODIFY"]:
+            for file in todo_files:
+                #print("Cache add " + file)
+                track = Track(file)
                 self.cache.put_track(track)
-            if event.maskname == "IN_DELETE":
-                self.cache.remove_track(event.pathname)
-            self._update_json()
+        if event.maskname in ["IN_DELETE", "IN_MOVED_FROM"]:
+            for file in todo_files:
+                #print("Cache remove " + file)
+                self.cache.remove_track(file)
+        self._update_json()
+        """
 
 
 class LibraryCache:

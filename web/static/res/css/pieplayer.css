@@ -339,7 +339,10 @@ progress::-webkit-progress-value {
 	text-align: center;
 	font-size: 70%;
 }
-
+#cached {
+    position: absolute;
+    right: 0;
+}
 
 /* fullpage.js */
 

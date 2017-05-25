@@ -36,7 +36,7 @@ window.onload = function() {
     init();
 
     player.onended = function() {
-        control.next();
+        control.next(true);
     };
     player.onpause = function() {
         document.getElementById("playPauseBtn").src = "./res/image/" + playBtn;
@@ -45,6 +45,10 @@ window.onload = function() {
         console.log("onplay");
         document.getElementById("playPauseBtn").src = "./res/image/" + pauseBtn;
     };
+
+    document.getElementById("progress").addEventListener('click', function(event) {
+        setProgress(event);
+    });
 
     $('#fullpage').fullpage({
         //Navigation
@@ -102,6 +106,8 @@ window.onload = function() {
     list_2.width -= 4;
     setVolume(document.getElementById("volumeSlider").value);
 
+    setInterval(function() { updateProgressBar() }, 200);
+
     changeBkg();
     setInterval(function() {
         changeBkg();
@@ -110,7 +116,22 @@ window.onload = function() {
     // set update cache time value
     setInterval(function () {
         cacheTimeAgo = timeAgo(cacheTime);
-    }, 10000); // ten sec
+        document.getElementById("cached").innerHTML = "Cached " + cacheTimeAgo;
+    }, 5000);
+};
+
+// key listening
+window.onkeyup = function(e) {
+    var playPauseKeys = [32, 75, 179]; // space, media key
+    var nextSongKeys = [76, 176]; // L, media key
+    var perviousSongKeys = [74, 177];
+
+    if (playPauseKeys.includes(e.keyCode)) // whitespace or media play/pause
+        control.playPause();
+    if (perviousSongKeys.includes(e.keyCode)) // media back
+        control.back();
+    if (nextSongKeys.includes(e.keyCode)) // media next
+        control.next();
 };
 
 var player;
@@ -137,25 +158,16 @@ var control = {
             player.play();
     },
     playPause: function () {
-        if (player.paused)
+        if (player.paused) {
             player.play();
-        else
+            if (playlist.length == 0)
+                buildPlaylistAndPlay(); // shuffle all
+        } else
             player.pause();
     }
 }
 
-    function setCurrentTrack(track) {
-    document.getElementById("title").innerHTML = track.title;
-    document.getElementById("artist").innerHTML = track.artist;
-    document.getElementById("album").innerHTML = track.album;
-    document.title = track.title + " - " + track.artist;
-
-    if (isLyricOn)
-        getLyrics(currentSong["albumartist"], currentSong["album"], currentSong["title"]);
-
-        player.src = "/song/" + track.id + "/stream";
-    player.load();
-
+function setCurrentTrack(track) {
     var imageUrl = "/" + track.id + "/artwork";
     if (isArtTop) {
         if (document.getElementById("artTop").src == imageUrl) { //if same
@@ -177,6 +189,44 @@ var control = {
             document.getElementById("artTop").style.opacity = "0";
         };
         isArtTop = true;
+    }
+
+    document.getElementById("title").innerHTML = track.title;
+    document.getElementById("artist").innerHTML = track.artist;
+    document.getElementById("album").innerHTML = track.album;
+    document.title = track.title + " - " + track.artist;
+
+    if (isLyricOn)
+        getLyrics(currentSong["albumartist"], currentSong["album"], currentSong["title"]);
+
+        player.src = "/song/" + track.id + "/stream";
+    player.load();
+
+}
+
+function setProgress() {
+    var bar = document.getElementById("progress");
+    var x = event.pageX - bar.offsetLeft;
+    var value = parseInt(x * bar.max / bar.offsetWidth);
+
+    player.currentTime = value;
+}
+
+function updateProgressBar() {
+    if (player) {
+        var duration = player.duration;
+        if (isNaN(duration)) duration = 0;
+        var pos = player.currentTime;
+        if (typeof(pos) == "number") {
+            document.getElementById("progress").value = pos;
+            document.getElementById("progress").max = duration;
+            document.getElementById("progress").innerHTML = pos + "/" + duration;
+            var x_pos = window.innerWidth * document.getElementById("progress").position - document.getElementById("progressText").offsetWidth/2;
+            document.getElementById("progressText").style.left = x_pos + "px";
+            var m = Math.floor(pos / 60);
+            var s = Math.floor(pos - m * 60);
+            document.getElementById("position").innerHTML = m + ":" + pad(s);
+        }
     }
 }
 
@@ -243,6 +293,7 @@ function setupLibrary(json) {
 
     cacheTime = jObj["cached_time"];
     cacheTimeAgo = timeAgo(cacheTime);
+    document.getElementById("cached").innerHTML = "Cached " + cacheTimeAgo;
 
     library = jObj["library"];
 
@@ -291,7 +342,9 @@ function constructArtistList() {
 
     artistList.appendChild(buildShuffleListItem());
 
-    for (var artist in library) {
+    var artistsItr = sortArtistAndGetItr(library);
+    while (artistsItr.hasNext()) {
+        var artist = artistsItr.next().value;
         var artistSongCount = 0;
         var albums = library[artist];
         for (var album in albums) {
@@ -310,8 +363,11 @@ function constructAlbumList(artist) {
         var artistAlbums = {};
 
         if (artist === SHUFFLE_ALL_ARTIST) {
-            for (artist in library)
+            var artistsItr = sortArtistAndGetItr(library);
+            while (artistsItr.hasNext()) {
+                var artist = artistsItr.next().value;
                 artistAlbums[artist] = getArtistAlbums(artist);
+            }
         } else {
             artistAlbums[artist] = getArtistAlbums(artist);
         }
@@ -433,6 +489,15 @@ function buildAlbumItem(artist, album) {
     return div;
 }
 
+function sortArtistAndGetItr(_library) {
+    var sortedArtists = [];
+    for (var artist in _library)
+        sortedArtists.push(artist);
+    sortedArtists.sort();
+
+    return iterator(sortedArtists);
+}
+
 function getArtistAlbums(artist) {
     var albums = [];
 
@@ -508,6 +573,14 @@ function shuffleArray(arr) {
 	};
 
 	return outArr;
+}
+
+function pad(num) { //pad number with leading 0
+    if (num < 10) {
+        return "0"+num;
+    } else {
+        return num;
+    }
 }
 
 function iterator(array) {
