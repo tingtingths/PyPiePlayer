@@ -19,9 +19,13 @@ Modify settings in config.py, then
 Serve the audio with a proper web server with WSGI support, e.g. nginx.  
 Sample config for nginx (assume the player was deployed at *somedomain.com/pie*)
 
-    location /pie/tmp  {
-            include  /etc/nginx/mime.types;
-            alias <path/to/player>/web/static/tmp;
-            auth_basic "Restricted Content";
-            auth_basic_user_file /etc/nginx/.htpasswd;
+    location /pie {
+        include uwsgi_params;
+        uwsgi_pass unix:<path_to_sock_file>;
+    }
+    
+    # delegate stream response to nginx
+    location /pie/stream {
+            internal;
+            alias <library_path>;
     }
