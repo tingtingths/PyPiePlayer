@@ -5,6 +5,7 @@ var cacheTime;
 var cacheTimeAgo;
 var shuffle = true;
 var isArtTop = true;
+var lyric = false;
 
 var selectedArtistDOM;
 var playlistItr;
@@ -146,7 +147,6 @@ var control = {
             player.play();
     },
     back: function (play) {
-        console.log(player.paused);
         if (!playlistItr.hasPervious())
             return null;
         if (typeof play === "undefined" && !player.paused)
@@ -195,8 +195,8 @@ function setCurrentTrack(track) {
     document.getElementById("album").innerHTML = track.album;
     document.title = track.title + " - " + track.artist;
 
-    if (isLyricOn)
-        getLyrics(currentSong["albumartist"], currentSong["album"], currentSong["title"]);
+    if (lyric)
+        getLyrics(track);
 
         player.src = "song/" + track.id + "/stream";
     player.load();
@@ -247,6 +247,19 @@ function setPlayerArtwork(src) { //album title
             document.getElementById("artTop").style.opacity = "0";
         };
         isArtTop = true;
+    }
+}
+
+function enableLyrics() {
+    if (lyric) {
+        lyric = false;
+        document.getElementById("getLyricBtn").style.color = "white";
+        document.getElementById("lyricbox").style.display = "none";
+    } else {
+        lyric = true;
+        document.getElementById("getLyricBtn").style.color = "rgb(255, 92, 92)";
+        document.getElementById("lyricbox").style.display = "block";
+        getLyrics(playlistItr.current().value);
     }
 }
 
@@ -528,6 +541,23 @@ function getArtistTracksIds(artist) {
 
 function getTrack(trackId) {
     return tracks[trackId];
+}
+
+function getLyrics(track) {
+    var box = document.getElementById("lyricbox");
+
+    box.innerHTML = "";
+    box.innerHTML = "Downloading..."
+    ajax("GET", "song/" + track.id + "/lyrics", true, function(req) {
+        if (req.readyState == 4 && req.status == 200) {
+            box.innerHTML = "";
+            var lines = JSON.parse(req.responseText);
+            for (i in lines) {
+                var line = lines[i];
+                box.innerHTML += line + "<br>";
+            }
+        }
+    });
 }
 
 function nodeCleanChild(node) {

@@ -50,7 +50,7 @@ class PlayerController:
         return resp
 
     def get_track_lyric(self, track_id):
-        track = self.lib.get_tracks(track_id)
+        track = self.lib.get_track(track_id)
         if track is None:
             flask.abort(404)
         tag = track.get_tag()
