@@ -2,3 +2,4 @@ pyinotify
 mutagen
 pillow
 flask
+beautifulsoup4
