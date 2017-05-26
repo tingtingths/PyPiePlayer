@@ -152,7 +152,11 @@ var control = {
         if (typeof play === "undefined" && !player.paused)
             play = true;
 
-        setCurrentTrack(playlistItr.back().value);
+        if (player.currentTime <= 3)
+            setCurrentTrack(playlistItr.back().value);
+        else
+            player.currentTime = 0;
+
         if (play)
             player.play();
     },
