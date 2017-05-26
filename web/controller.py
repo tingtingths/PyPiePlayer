@@ -2,7 +2,6 @@ import io
 import os
 
 import flask
-from flask import stream_with_context, Response
 
 from web import app
 from player.grab_lyrics import *
@@ -42,9 +41,13 @@ class PlayerController:
         track = self.lib.get_track(track_id)
         if track is None:
             flask.abort(404)
-        dirname = os.path.dirname(track.get_path())
-        basename = os.path.basename(track.get_path())
-        return flask.send_from_directory(dirname, basename)
+        prefix = os.path.commonprefix([self.lib.library_path, track.get_path()])
+        path = "/pie/stream" + track.get_path()[len(prefix):]
+
+        resp = flask.make_response()
+        resp.headers["Content-Type"] = track.get_mimetype()
+        resp.headers["X-Accel-Redirect"] = path.encode("utf-8")
+        return resp
 
     def get_track_lyric(self, track_id):
         track = self.lib.get_tracks(track_id)
