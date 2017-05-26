@@ -42,7 +42,6 @@ window.onload = function() {
         document.getElementById("playPauseBtn").src = "./res/image/" + playBtn;
     };
     player.onplay = function() {
-        console.log("onplay");
         document.getElementById("playPauseBtn").src = "./res/image/" + pauseBtn;
     };
 
