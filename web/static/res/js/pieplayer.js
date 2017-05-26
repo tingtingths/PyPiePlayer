@@ -147,8 +147,10 @@ var control = {
             player.play();
     },
     back: function (play) {
-        if (!playlistItr.hasPervious())
+        if (!playlistItr.hasPervious()) {
+            player.currentTime = 0;
             return null;
+        }
         if (typeof play === "undefined" && !player.paused)
             play = true;
 
