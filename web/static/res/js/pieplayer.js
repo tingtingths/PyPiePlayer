@@ -11,6 +11,8 @@ var selectedArtistDOM;
 var playlistItr;
 var playlist = [];
 
+var artworkProcessId;
+
 //btn name
 var playBtn = "playNew.png";
 var pauseBtn = "pauseNew.png";
@@ -173,27 +175,34 @@ var control = {
 }
 
 function setCurrentTrack(track) {
+    var processId = Math.random().toString(36).substring(8);
+    artworkProcessId = processId;
     var imageUrl = track.id + "/artwork";
+    var artTop = document.getElementById("artTop");
+    var artBottom = document.getElementById("artBottom");
+
     if (isArtTop) {
-        if (document.getElementById("artTop").src == imageUrl) { //if same
-            document.getElementById("artTop").style.opacity = "1";
+        if (artTop.src == imageUrl) { //if same
+            artTop.style.opacity = "1";
         } else {
-            document.getElementById("artTop").src = imageUrl;
+            artTop.src = imageUrl;
         }
-        document.getElementById("artTop").onload = function() { //wait untill the image is loaded
-            document.getElementById("artTop").style.opacity = "1";
-        };
         isArtTop = false;
-    } else {
-        if (document.getElementById("artTop").src == imageUrl) {
-            document.getElementById("artTop").style.opacity = "0";
-        } else {
-            document.getElementById("artBottom").src = imageUrl;
-        }
-        document.getElementById("artBottom").onload = function() {
-            document.getElementById("artTop").style.opacity = "0";
+        artTop.onload = function() { //wait untill the image is loaded
+            if (artworkProcessId === processId)
+                artTop.style.opacity = "1";
         };
+    } else {
+        if (artTop.src == imageUrl) {
+            artTop.style.opacity = "0";
+        } else {
+            artBottom.src = imageUrl;
+        }
         isArtTop = true;
+        artBottom.onload = function() {
+            if (artworkProcessId === processId)
+                artTop.style.opacity = "0";
+        };
     }
 
     document.getElementById("title").innerHTML = track.title;
