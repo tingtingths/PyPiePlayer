@@ -494,9 +494,11 @@ function buildAlbumItem(artist, album) {
 
     // sort song with track_num
     tracks.sort(function(a, b) {
-        var numA = a["track_num"].split("/")[0];
-        var numB = b["track_num"].split("/")[0];
-        return numA - numB;
+        if (a["track_num"]) {
+            var numA = a["track_num"].split("/")[0];
+            var numB = b["track_num"].split("/")[0];
+            return numA - numB;
+        }
     });
 
     // for each song in album
