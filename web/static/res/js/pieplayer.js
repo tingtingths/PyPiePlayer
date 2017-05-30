@@ -177,7 +177,8 @@ var control = {
 function setCurrentTrack(track) {
     var processId = Math.random().toString(36).substring(8);
     artworkProcessId = processId;
-    var imageUrl = track.id + "/artwork";
+    var albumFirstTrack = getAlbumFirstTrack(track.id);
+    var imageUrl = albumFirstTrack.id + "/artwork";
     var artTop = document.getElementById("artTop");
     var artBottom = document.getElementById("artBottom");
 
@@ -556,6 +557,12 @@ function getArtistTracksIds(artist) {
 
 function getTrack(trackId) {
     return tracks[trackId];
+}
+
+function getAlbumFirstTrack(trackId) {
+    var track = getTrack(trackId);
+    var trackIds = getAlbumTrackIds(track.artist, track.album);
+    return getTrack(trackIds[0]);
 }
 
 function getLyrics(track) {
