@@ -219,9 +219,9 @@ function setCurrentTrack(track) {
     }
 
     document.getElementById("title").innerHTML = track.title;
-    document.getElementById("artist").innerHTML = track.artist;
+    document.getElementById("artist").innerHTML = track.album_artist;
     document.getElementById("album").innerHTML = track.album;
-    document.title = track.title + " - " + track.artist;
+    document.title = track.title + " - " + track.album_artist;
 
     if (lyric)
         getLyrics(track);
@@ -444,7 +444,7 @@ function buildShuffleListItem() {
     };
     shuffle_a.innerHTML = "Shuffle All";
     shuffle_a.onclick = function() { buildPlaylistAndPlay(); }
-    shuffle_p.innerHTML = constructArtistInfoText(albumCount, songCount);
+    shuffle_p.innerHTML = constructAllArtistInfoText(Object.size(library), albumCount, songCount);
     shuffle_p.id = "shuffle_p";
 
     // append shuffle elements
@@ -582,7 +582,7 @@ function getTrack(trackId) {
 
 function getAlbumFirstTrack(trackId) {
     var track = getTrack(trackId);
-    var trackIds = getAlbumTrackIds(track.artist, track.album);
+    var trackIds = getAlbumTrackIds(track.album_artist, track.album);
     return getTrack(trackIds[0]);
 }
 
@@ -632,6 +632,12 @@ function timeAgo(time) {
     s += m + " minutes ago";
 
     return s;
+}
+
+function constructAllArtistInfoText(artistCount, albumCount, songCount) {
+	return artistCount + " artist" + ((artistCount > 1) ? "s, " : ", ")
+			+ albumCount + " album" + ((albumCount > 1) ? "s, " : ", ")
+			+ songCount + " song" + ((songCount > 1) ? "s" : "");
 }
 
 function constructArtistInfoText(albumCount, songCount) {
@@ -720,4 +726,12 @@ function pointer(array) {
             return idx;
         }
     };
+}
+
+Object.size = function(obj) {
+	var size = 0, key;
+	for (key in obj) {
+        if (obj.hasOwnProperty(key)) size++;
+    }
+    return size;
 }
