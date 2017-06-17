@@ -1,5 +1,6 @@
 var library; // {artist, {album, {id, track}}}
 var tracks = {};
+var albumCount = 0;
 var songCount = 0;
 var cacheTime;
 var cacheTimeAgo;
@@ -174,6 +175,17 @@ var control = {
     }
 }
 
+function scanLibrary() {
+    document.getElementById("cached").innerHTML = "Scanning...";
+
+    ajax("GET", "scan", true, function(req) {
+        if (req.readyState === 4 && req.status === 200) {
+            console.log("scanning done");
+            init();
+        }
+    });
+}
+
 function setCurrentTrack(track) {
     var processId = Math.random().toString(36).substring(8);
     artworkProcessId = processId;
@@ -325,9 +337,12 @@ function setupLibrary(json) {
 
     library = jObj["library"];
 
-    // count songs
+	albumCount = 0;
+	songCount = 0;
+    // count albums and songs
     for (var artist in library) {
         for (var album in library[artist]) {
+			albumCount++;
             songCount += getAlbumTrackIds(artist, album).length;
             for (var id in library[artist][album]) {
                 tracks[id] = library[artist][album][id];
@@ -374,11 +389,14 @@ function constructArtistList() {
     while (artistsItr.hasNext()) {
         var artist = artistsItr.next().value;
         var artistSongCount = 0;
+		var albumCount = 0;
         var albums = library[artist];
         for (var album in albums) {
             artistSongCount += Object.keys(library[artist][album]).length;
+			albumCount++;
         }
-        artistList.appendChild(buildArtistListItem(artist, artistSongCount));
+        artistList.appendChild(buildArtistListItem(artist, albumCount, artistSongCount));
+		artistList.appendChild(document.createElement("hr"));
     }
 
     artistList.style.height = "100%";
@@ -426,18 +444,19 @@ function buildShuffleListItem() {
     };
     shuffle_a.innerHTML = "Shuffle All";
     shuffle_a.onclick = function() { buildPlaylistAndPlay(); }
-    shuffle_p.innerHTML = songCount + " songs";
+    shuffle_p.innerHTML = constructArtistInfoText(albumCount, songCount);
     shuffle_p.id = "shuffle_p";
 
     // append shuffle elements
     shuffle_div.appendChild(shuffle_a);
     shuffle_div.appendChild(document.createElement("br"));
     shuffle_div.appendChild(shuffle_p);
+	shuffle_div.appendChild(document.createElement("hr"));
 
     return shuffle_div;
 }
 
-function buildArtistListItem(artist, count) {
+function buildArtistListItem(artist, albumCount, songCount) {
     var div = document.createElement("div");
     var a = document.createElement("a");
     var p = document.createElement("p");
@@ -454,7 +473,7 @@ function buildArtistListItem(artist, count) {
     a.appendChild(document.createTextNode(artist));
     a.className = "artists_name";
     a.onclick = function() { buildPlaylistAndPlay(artist); }
-    p.innerHTML = count + " songs";
+	p.innerHTML = constructArtistInfoText(albumCount, songCount);
     p.className = "artists_detail";
 
     //q append
@@ -613,6 +632,11 @@ function timeAgo(time) {
     s += m + " minutes ago";
 
     return s;
+}
+
+function constructArtistInfoText(albumCount, songCount) {
+	return albumCount + " album" + ((albumCount > 1) ? "s, " : ", ")
+			+ songCount + " song" + ((songCount > 1) ? "s" : "");
 }
 
 function shuffleArray(arr) {
