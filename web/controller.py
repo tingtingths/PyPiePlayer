@@ -8,17 +8,16 @@ from player.grab_lyrics import *
 from player.constant.tag import *
 
 
-def get_controller(lib):
-    CONTROLLER = PlayerController(lib)
+WEB_CONTROLLER = None
 
-    app.add_url_rule("/test", view_func=CONTROLLER.test, methods=["GET"])
-    app.add_url_rule("/library", view_func=CONTROLLER.get_library, methods=["GET"])
-    app.add_url_rule("/<track_id>/artwork", view_func=CONTROLLER.get_art_bytes, methods=["GET"])
-    app.add_url_rule("/song/<track_id>/stream", view_func=CONTROLLER.get_track_bytes, methods=["GET"])
-    app.add_url_rule("/song/<track_id>/lyrics", view_func=CONTROLLER.get_track_lyric, methods=["GET"])
+def setup_web_controller(lib):
+    WEB_CONTROLLER = PlayerController(lib)
 
-    return CONTROLLER
-
+    app.add_url_rule("/test", view_func=WEB_CONTROLLER.test, methods=["GET"])
+    app.add_url_rule("/library", view_func=WEB_CONTROLLER.get_library, methods=["GET"])
+    app.add_url_rule("/<track_id>/artwork", view_func=WEB_CONTROLLER.get_art_bytes, methods=["GET"])
+    app.add_url_rule("/song/<track_id>/stream", view_func=WEB_CONTROLLER.get_track_bytes, methods=["GET"])
+    app.add_url_rule("/song/<track_id>/lyrics", view_func=WEB_CONTROLLER.get_track_lyric, methods=["GET"])
 
 class PlayerController:
     def __init__(self, lib):

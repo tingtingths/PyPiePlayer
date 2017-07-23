@@ -30,11 +30,15 @@ var isLyricOn = false;
 var isArtTop = false;
 
 var player;
+var source;
 var playerStatus = 1;
 var State = {
     PLAYING: 0,
     PAUSE: 1
 };
+
+var preloadId = null;
+var preloadedBlob = null;
 
 window.onload = function() {
     init();
@@ -48,6 +52,18 @@ window.onload = function() {
     player.onplay = function() {
         document.getElementById("playPauseBtn").src = "./res/image/" + pauseBtn;
     };
+
+    player.oncanplaythrough = function() {
+        if (playlistItr.hasNext()) {
+            var id = playlistItr.next().value.id;
+            playlistItr.back();
+            ajax("GET", "song/" + id + "/stream", true, function(req) {
+                var blob = new Blob([req.response], {type : 'audio/mp4'});
+				preloadId = id;
+                preloadedBlob = URL.createObjectURL(blob);
+            }, "blob");
+        }
+    }
 
     document.getElementById("progress").addEventListener('click', function(event) {
         setProgress(event);
@@ -226,9 +242,12 @@ function setCurrentTrack(track) {
     if (lyric)
         getLyrics(track);
 
+    if (preloadedBlob !== null && preloadId === track.id) {
+        player.src = preloadedBlob;
+    } else {
         player.src = "song/" + track.id + "/stream";
-    player.load();
-
+        player.load();
+    }
 }
 
 function setProgress() {
@@ -306,6 +325,8 @@ function init() {
         playerStatus = State.PLAYING;
         document.getElementById("playPauseBtn").src = "./res/image/pauseNew.png";
     };
+
+    source = document.getElementById("source");
 
     setVolume(100);
 
@@ -396,7 +417,7 @@ function constructArtistList() {
 			albumCount++;
         }
         artistList.appendChild(buildArtistListItem(artist, albumCount, artistSongCount));
-		artistList.appendChild(document.createElement("hr"));
+		//artistList.appendChild(document.createElement("hr"));
     }
 
     artistList.style.height = "100%";
@@ -451,7 +472,7 @@ function buildShuffleListItem() {
     shuffle_div.appendChild(shuffle_a);
     shuffle_div.appendChild(document.createElement("br"));
     shuffle_div.appendChild(shuffle_p);
-	shuffle_div.appendChild(document.createElement("hr"));
+	//shuffle_div.appendChild(document.createElement("hr"));
 
     return shuffle_div;
 }
@@ -609,10 +630,13 @@ function nodeCleanChild(node) {
     }
 }
 
-function ajax(method, url, async, callback) {
+function ajax(method, url, async, callback, responseType) {
     var req = new XMLHttpRequest();
 
-    req.onreadystatechange = function() { callback(req) };
+    if (responseType !== undefined)
+        req.responseType = responseType;
+
+    req.onload = function() { callback(req) };
     req.open(method, url, async);
     req.send();
 }
