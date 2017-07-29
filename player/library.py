@@ -9,7 +9,7 @@ from player.data.track import Track
 
 
 class Library:
-    file_type = [".m4a", ".mp3", ".flac", ".aac"]
+    file_type = [".m4a", ".mp3", ".flac", ".aac", ".opus", ".ogg"]
     watch_mask = pyinotify.IN_CREATE | pyinotify.IN_DELETE | pyinotify.IN_MOVED_FROM \
                  | pyinotify.IN_MOVED_TO | pyinotify.IN_MODIFY
     library_file = "library_json"
