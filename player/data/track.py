@@ -8,7 +8,7 @@ import mutagen
 from mutagen.flac import Picture
 from PIL import Image
 
-from tag import *
+from player.constant.tag import *
 
 
 class Track:
