@@ -2,11 +2,13 @@ import io
 import json
 import os
 import uuid
+import base64
 
 import mutagen
+from mutagen.flac import Picture
 from PIL import Image
 
-from player.constant.tag import *
+from tag import *
 
 
 class Track:
@@ -85,8 +87,15 @@ class Track:
 
         if f:
             try:
-                data = io.BytesIO(f["covr"][0])
-                img = Image.open(data)
+                data = b''
+                if set(["audio/ogg", "audio/flac"]) & set(f.mime):
+                    raw = base64.b64decode(f["metadata_block_picture"][0])
+                    pic = Picture(raw)
+                    data = pic.data
+                else:
+                    data = f["covr"][0]
+
+                img = Image.open(io.BytesIO(data))
                 # resize and convert to jpeg
                 img.thumbnail((400, 400), Image.ANTIALIAS)
                 formated_b = io.BytesIO()
@@ -94,7 +103,7 @@ class Track:
 
                 return formated_b.getvalue(), "jpg"
             except Exception as e:
-                print(e.message)
+                print(e)
                 return None, "error"
 
     def to_json(self):
