@@ -419,6 +419,7 @@ function buildPlaylistAndPlay(artist, album, track_id) {
         }
     } else { // shuffle all
         shuffle = true;
+        playlist = Object.values(tracks);
     }
 
     playlist = groupByArtistAndSortTrack(playlist);
@@ -448,11 +449,12 @@ function groupByArtistAndSortTrack(_playlist) {
     // sort by track num
     for (artist in artistsTracks) {
         artistsTracks[artist].sort(function (a, b) {
-            if (a["track_num"]) {
+            if (a["track_num"] && b["track_num"]) {
                 var numA = a["track_num"].split("/")[0];
                 var numB = b["track_num"].split("/")[0];
                 return numA - numB;
             }
+            return 0;
         });
         for (idx in artistsTracks[artist])
             ret.push(artistsTracks[artist][idx]);
