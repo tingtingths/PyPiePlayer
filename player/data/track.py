@@ -18,8 +18,11 @@ class Track:
     album = None
     title = None
     track_num = None
-    mimetype_dict = {".m4a": "audio/mp4", ".mp3": "audio/mpeg", ".flac": "audio/flac", ".acc": "audio/acc"}
-
+    mimetype_dict = {
+		".m4a": "audio/mp4", ".mp3": "audio/mpeg", ".flac": "audio/flac", \
+		".acc": "audio/acc", ".ogg": "audio/ogg", ".opus": "audio/opus"
+	}
+		
     def __init__(self, path=None, marshalled_json=None):
         if path:
             self.id = uuid.uuid4().hex.replace("-", "")[:12]

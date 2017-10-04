@@ -768,7 +768,7 @@ function iterator(array) {
                 { value: array[idx], done: true };
         },
         hasNext: function () {
-            return idx < array.length;
+            return idx < array.length - 1;
         },
         hasPervious: function () {
             return idx > 0;
