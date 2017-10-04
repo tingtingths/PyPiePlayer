@@ -11,6 +11,7 @@ var lyric = false;
 var selectedArtistDOM;
 var playlistItr;
 var playlist = [];
+var orderedPlaylist = [];
 
 var artworkProcessId;
 
@@ -40,32 +41,32 @@ var State = {
 var preloadId = null;
 var preloadedBlob = null;
 
-window.onload = function() {
+window.onload = function () {
     init();
 
-    player.onended = function() {
+    player.onended = function () {
         control.next(true);
     };
-    player.onpause = function() {
+    player.onpause = function () {
         document.getElementById("playPauseBtn").src = "./res/image/" + playBtn;
     };
-    player.onplay = function() {
+    player.onplay = function () {
         document.getElementById("playPauseBtn").src = "./res/image/" + pauseBtn;
     };
 
-    player.oncanplaythrough = function() {
+    player.oncanplaythrough = function () {
         if (playlistItr.hasNext()) {
             var id = playlistItr.next().value.id;
             playlistItr.back();
-            ajax("GET", "song/" + id + "/stream", true, function(req) {
-                var blob = new Blob([req.response], {type : 'audio/mp4'});
-				preloadId = id;
+            ajax("GET", "song/" + id + "/stream", true, function (req) {
+                var blob = new Blob([req.response], { type: 'audio/mp4' });
+                preloadId = id;
                 preloadedBlob = URL.createObjectURL(blob);
             }, "blob");
         }
     }
 
-    document.getElementById("progress").addEventListener('click', function(event) {
+    document.getElementById("progress").addEventListener('click', function (event) {
         setProgress(event);
     });
 
@@ -100,8 +101,8 @@ window.onload = function() {
         //Design
         controlArrows: false,
         verticalCentered: false,
-        resize : false,
-        sectionsColor : ['#ccc', '#fff'],
+        resize: false,
+        sectionsColor: ['#ccc', '#fff'],
         paddingTop: '0',
         paddingBottom: '0',
         fixedElements: '#header, .footer',
@@ -112,12 +113,12 @@ window.onload = function() {
         slideSelector: '.slide',
 
         //events
-        onLeave: function(index, nextIndex, direction){},
-        afterLoad: function(anchorLink, index){},
-        afterRender: function(){},
-        afterResize: function(){},
-        afterSlideLoad: function(anchorLink, index, slideAnchor, slideIndex){},
-        onSlideLeave: function(anchorLink, index, slideIndex, direction){}
+        onLeave: function (index, nextIndex, direction) { },
+        afterLoad: function (anchorLink, index) { },
+        afterRender: function () { },
+        afterResize: function () { },
+        afterSlideLoad: function (anchorLink, index, slideAnchor, slideIndex) { },
+        onSlideLeave: function (anchorLink, index, slideIndex, direction) { }
     });
 
     document.getElementById("volumeSlider").value = 100;
@@ -125,10 +126,10 @@ window.onload = function() {
     list_2.width -= 4;
     setVolume(document.getElementById("volumeSlider").value);
 
-    setInterval(function() { updateProgressBar() }, 200);
+    setInterval(function () { updateProgressBar() }, 200);
 
     changeBkg();
-    setInterval(function() {
+    setInterval(function () {
         changeBkg();
     }, bkg_refresh_rate); //change bkg for every bkg_refresh_rate
 
@@ -140,7 +141,7 @@ window.onload = function() {
 };
 
 // key listening
-window.onkeyup = function(e) {
+window.onkeyup = function (e) {
     var playPauseKeys = [32, 75, 179]; // space, media key
     var nextSongKeys = [76, 176]; // L, media key
     var perviousSongKeys = [74, 177];
@@ -191,10 +192,37 @@ var control = {
     }
 }
 
-function scanLibrary() {
+function toggleShuffle(btn) {
+    shuffle = !shuffle;
+
+    // set ui and state
+    if (shuffle)
+        btn.setAttribute("style", "");
+    else
+        btn.setAttribute("style", "-webkit-filter: invert(50%)");
+
+    if (typeof playlistItr === "undefined")
+        return;
+
+    var currentTrack = playlistItr.current().value;
+
+    if (shuffle) {
+        // shuffle current playlist
+        playlist = shuffleArray(playlist);
+        playlistItr = pointer(playlist);
+        playlistItr.idx(playlist.indexOf(currentTrack));
+    } else {
+        // unshuffle playlist
+        playlist = orderedPlaylist.slice();
+        playlistItr = pointer(playlist);
+        playlistItr.idx(playlist.indexOf(currentTrack));
+    }
+}
+
+function resetLibrary() {
     document.getElementById("cached").innerHTML = "Scanning...";
 
-    ajax("GET", "scan", true, function(req) {
+    ajax("DELETE", "library", true, function (req) {
         if (req.readyState === 4 && req.status === 200) {
             console.log("scanning done");
             init();
@@ -217,7 +245,7 @@ function setCurrentTrack(track) {
             artTop.src = imageUrl;
         }
         isArtTop = false;
-        artTop.onload = function() { //wait untill the image is loaded
+        artTop.onload = function () { //wait untill the image is loaded
             if (artworkProcessId === processId)
                 artTop.style.opacity = "1";
         };
@@ -228,7 +256,7 @@ function setCurrentTrack(track) {
             artBottom.src = imageUrl;
         }
         isArtTop = true;
-        artBottom.onload = function() {
+        artBottom.onload = function () {
             if (artworkProcessId === processId)
                 artTop.style.opacity = "0";
         };
@@ -263,11 +291,11 @@ function updateProgressBar() {
         var duration = player.duration;
         if (isNaN(duration)) duration = 0;
         var pos = player.currentTime;
-        if (typeof(pos) == "number") {
+        if (typeof (pos) == "number") {
             document.getElementById("progress").value = pos;
             document.getElementById("progress").max = duration;
             document.getElementById("progress").innerHTML = pos + "/" + duration;
-            var x_pos = window.innerWidth * document.getElementById("progress").position - document.getElementById("progressText").offsetWidth/2;
+            var x_pos = window.innerWidth * document.getElementById("progress").position - document.getElementById("progressText").offsetWidth / 2;
             document.getElementById("progressText").style.left = x_pos + "px";
             var m = Math.floor(pos / 60);
             var s = Math.floor(pos - m * 60);
@@ -277,20 +305,20 @@ function updateProgressBar() {
 }
 
 function setVolume(vol) {
-    player.volume = vol/100;
+    player.volume = vol / 100;
     document.getElementById("volumeSlider").value = vol;
 }
 
 function setPlayerArtwork(src) { //album title
     if (isArtTop) {
         document.getElementById("artTop").src = src;
-        document.getElementById("artTop").onload = function() { //wait untill the image is loaded
+        document.getElementById("artTop").onload = function () { //wait untill the image is loaded
             document.getElementById("artTop").style.opacity = "1";
         };
         isArtTop = false;
     } else {
         document.getElementById("artBottom").src = src;
-        document.getElementById("artBottom").onload = function() {
+        document.getElementById("artBottom").onload = function () {
             document.getElementById("artTop").style.opacity = "0";
         };
         isArtTop = true;
@@ -314,14 +342,14 @@ function init() {
     var library_json = "";
     player = document.getElementById("player");
 
-    player.onended = function() {
+    player.onended = function () {
         nextTrack();
     };
-    player.onpause = function() {
+    player.onpause = function () {
         playerStatus = State.PAUSE;
         document.getElementById("playPauseBtn").src = "./res/image/playNew.png";
     };
-    player.onplay = function() {
+    player.onplay = function () {
         playerStatus = State.PLAYING;
         document.getElementById("playPauseBtn").src = "./res/image/pauseNew.png";
     };
@@ -330,7 +358,7 @@ function init() {
 
     setVolume(100);
 
-    ajax("GET", "library", true, function(req) {
+    ajax("GET", "library", true, function (req) {
         if (req.readyState === 4 && req.status === 200) {
             library_json = req.responseText;
             setupLibrary(library_json);
@@ -344,7 +372,7 @@ function init() {
 
 function hoverProgressText(ele) {
     document.getElementById("progressText").style.opacity = "1";
-    setTimeout(function() {
+    setTimeout(function () {
         document.getElementById("progressText").style.opacity = "0";
     }, 2500);
 }
@@ -358,12 +386,12 @@ function setupLibrary(json) {
 
     library = jObj["library"];
 
-	albumCount = 0;
-	songCount = 0;
+    albumCount = 0;
+    songCount = 0;
     // count albums and songs
     for (var artist in library) {
         for (var album in library[artist]) {
-			albumCount++;
+            albumCount++;
             songCount += getAlbumTrackIds(artist, album).length;
             for (var id in library[artist][album]) {
                 tracks[id] = library[artist][album][id];
@@ -389,16 +417,48 @@ function buildPlaylistAndPlay(artist, album, track_id) {
             var id = itr.next().value;
             playlist.push(getTrack(id));
         }
-    } else { // shuffle
-        playlist = shuffleArray(Object.values(tracks));
+    } else { // shuffle all
+        shuffle = true;
     }
 
+    playlist = groupByArtistAndSortTrack(playlist);
+    orderedPlaylist = playlist.slice();
     if (shuffle)
         playlist = shuffleArray(playlist);
 
     playlistItr = pointer(playlist);
     playlistItr.idx(-1);
     control.next(true);
+}
+
+function groupByArtistAndSortTrack(_playlist) {
+    var artistsTracks = {};
+    var ret = [];
+
+    for (idx in _playlist) {
+        var t = _playlist[idx];
+
+        if (typeof artistsTracks[t.artist] === "undefined")
+            artistsTracks[t.artist] = [t];
+        else
+            artistsTracks[t.artist].push(t);
+    }
+
+    ret = [];
+    // sort by track num
+    for (artist in artistsTracks) {
+        artistsTracks[artist].sort(function (a, b) {
+            if (a["track_num"]) {
+                var numA = a["track_num"].split("/")[0];
+                var numB = b["track_num"].split("/")[0];
+                return numA - numB;
+            }
+        });
+        for (idx in artistsTracks[artist])
+            ret.push(artistsTracks[artist][idx]);
+    }
+
+    return ret;
 }
 
 function constructArtistList() {
@@ -410,14 +470,14 @@ function constructArtistList() {
     while (artistsItr.hasNext()) {
         var artist = artistsItr.next().value;
         var artistSongCount = 0;
-		var albumCount = 0;
+        var albumCount = 0;
         var albums = library[artist];
         for (var album in albums) {
             artistSongCount += Object.keys(library[artist][album]).length;
-			albumCount++;
+            albumCount++;
         }
         artistList.appendChild(buildArtistListItem(artist, albumCount, artistSongCount));
-		//artistList.appendChild(document.createElement("hr"));
+        //artistList.appendChild(document.createElement("hr"));
     }
 
     artistList.style.height = "100%";
@@ -455,7 +515,7 @@ function buildShuffleListItem() {
     var shuffle_p = document.createElement("p");
     shuffle_div.id = "shuffle_div";
     shuffle_div.artist = SHUFFLE_ALL_ARTIST;
-    shuffle_div.onclick = function() {
+    shuffle_div.onclick = function () {
         if (selectedArtistDOM) {
             selectedArtistDOM.style.background = "";
         }
@@ -464,7 +524,7 @@ function buildShuffleListItem() {
         constructAlbumList(SHUFFLE_ALL_ARTIST); // TODO replace with const
     };
     shuffle_a.innerHTML = "Shuffle All";
-    shuffle_a.onclick = function() { buildPlaylistAndPlay(); }
+    shuffle_a.onclick = function () { buildPlaylistAndPlay(); }
     shuffle_p.innerHTML = constructAllArtistInfoText(Object.size(library), albumCount, songCount);
     shuffle_p.id = "shuffle_p";
 
@@ -472,7 +532,7 @@ function buildShuffleListItem() {
     shuffle_div.appendChild(shuffle_a);
     shuffle_div.appendChild(document.createElement("br"));
     shuffle_div.appendChild(shuffle_p);
-	//shuffle_div.appendChild(document.createElement("hr"));
+    //shuffle_div.appendChild(document.createElement("hr"));
 
     return shuffle_div;
 }
@@ -483,7 +543,7 @@ function buildArtistListItem(artist, albumCount, songCount) {
     var p = document.createElement("p");
 
     div.className = "artists";
-    div.onclick = function() {
+    div.onclick = function () {
         if (selectedArtistDOM) {
             selectedArtistDOM.style.background = "";
         }
@@ -493,8 +553,8 @@ function buildArtistListItem(artist, albumCount, songCount) {
     };
     a.appendChild(document.createTextNode(artist));
     a.className = "artists_name";
-    a.onclick = function() { buildPlaylistAndPlay(artist); }
-	p.innerHTML = constructArtistInfoText(albumCount, songCount);
+    a.onclick = function () { buildPlaylistAndPlay(artist); }
+    p.innerHTML = constructArtistInfoText(albumCount, songCount);
     p.className = "artists_detail";
 
     //q append
@@ -520,7 +580,7 @@ function buildAlbumItem(artist, album) {
     a = document.createElement("a");
     a.className = "albums_title";
     a.appendChild(document.createTextNode(album));
-    a.onclick = function() { buildPlaylistAndPlay(artist, album); }
+    a.onclick = function () { buildPlaylistAndPlay(artist, album); }
     img = document.createElement("img");
     img.src = tracks[0].id + "/artwork";
 
@@ -533,7 +593,7 @@ function buildAlbumItem(artist, album) {
     img.className = "albums_artwork";
 
     // sort song with track_num
-    tracks.sort(function(a, b) {
+    tracks.sort(function (a, b) {
         if (a["track_num"]) {
             var numA = a["track_num"].split("/")[0];
             var numB = b["track_num"].split("/")[0];
@@ -543,12 +603,12 @@ function buildAlbumItem(artist, album) {
 
     // for each song in album
     for (var i = 0; i < tracks.length; i++) {
-        (function(i) {
+        (function (i) {
             var track = tracks[i];
             var a = document.createElement("a");
             a.className = "songs_title";
             a.appendChild(document.createTextNode(track.title));
-            a.onclick = function() { buildPlaylistAndPlay(artist, album, track.id); }
+            a.onclick = function () { buildPlaylistAndPlay(artist, album, track.id); }
             div_right.appendChild(a);
             if (i !== (tracks.length - 1)) {
                 div_right.appendChild(document.createElement("br"));
@@ -612,7 +672,7 @@ function getLyrics(track) {
 
     box.innerHTML = "";
     box.innerHTML = "Downloading..."
-    ajax("GET", "song/" + track.id + "/lyrics", true, function(req) {
+    ajax("GET", "song/" + track.id + "/lyrics", true, function (req) {
         if (req.readyState == 4 && req.status == 200) {
             box.innerHTML = "";
             var lines = JSON.parse(req.responseText);
@@ -636,7 +696,7 @@ function ajax(method, url, async, callback, responseType) {
     if (responseType !== undefined)
         req.responseType = responseType;
 
-    req.onload = function() { callback(req) };
+    req.onload = function () { callback(req) };
     req.open(method, url, async);
     req.send();
 }
@@ -659,32 +719,32 @@ function timeAgo(time) {
 }
 
 function constructAllArtistInfoText(artistCount, albumCount, songCount) {
-	return artistCount + " artist" + ((artistCount > 1) ? "s, " : ", ")
-			+ albumCount + " album" + ((albumCount > 1) ? "s, " : ", ")
-			+ songCount + " song" + ((songCount > 1) ? "s" : "");
+    return artistCount + " artist" + ((artistCount > 1) ? "s, " : ", ")
+        + albumCount + " album" + ((albumCount > 1) ? "s, " : ", ")
+        + songCount + " song" + ((songCount > 1) ? "s" : "");
 }
 
 function constructArtistInfoText(albumCount, songCount) {
-	return albumCount + " album" + ((albumCount > 1) ? "s, " : ", ")
-			+ songCount + " song" + ((songCount > 1) ? "s" : "");
+    return albumCount + " album" + ((albumCount > 1) ? "s, " : ", ")
+        + songCount + " song" + ((songCount > 1) ? "s" : "");
 }
 
 function shuffleArray(arr) {
-	var outArr = [];
-	var len = arr.length;
+    var outArr = [];
+    var len = arr.length;
 
-	for (var i = 0; i < len; i++) {
-		var pick = Math.floor(Math.random() * arr.length);
-		outArr.push(arr[pick]);
-		arr.splice(pick, 1);
-	};
+    for (var i = 0; i < len; i++) {
+        var pick = Math.floor(Math.random() * arr.length);
+        outArr.push(arr[pick]);
+        arr.splice(pick, 1);
+    };
 
-	return outArr;
+    return outArr;
 }
 
 function pad(num) { //pad number with leading 0
     if (num < 10) {
-        return "0"+num;
+        return "0" + num;
     } else {
         return num;
     }
@@ -694,26 +754,26 @@ function iterator(array) {
     var idx = 0;
 
     return {
-        current: function() {
-            return {value: array[idx]};
+        current: function () {
+            return { value: array[idx] };
         },
-        next: function() {
+        next: function () {
             return idx < array.length ?
-                {value: array[idx++], done: false} :
-                {value: array[idx], done: true};
+                { value: array[idx++], done: false } :
+                { value: array[idx], done: true };
         },
-        back: function() {
+        back: function () {
             return idx >= 0 ?
-                {value: array[--idx], done: false} :
-                {value: array[idx], done: true};
+                { value: array[--idx], done: false } :
+                { value: array[idx], done: true };
         },
-        hasNext: function() {
+        hasNext: function () {
             return idx < array.length;
         },
         hasPervious: function () {
             return idx > 0;
         },
-        idx: function(newIdx) {
+        idx: function (newIdx) {
             if (typeof newIdx !== "undefined")
                 idx = newIdx;
             return idx;
@@ -725,26 +785,26 @@ function pointer(array) {
     var idx = 0;
 
     return {
-        current: function() {
-            return {value: array[idx]};
+        current: function () {
+            return { value: array[idx] };
         },
-        next: function() {
+        next: function () {
             return idx < array.length ?
-                {value: array[++idx], done: false} :
-                {value: array[idx], done: true};
+                { value: array[++idx], done: false } :
+                { value: array[idx], done: true };
         },
-        back: function() {
+        back: function () {
             return idx >= 0 ?
-                {value: array[--idx], done: false} :
-                {value: array[idx], done: true};
+                { value: array[--idx], done: false } :
+                { value: array[idx], done: true };
         },
-        hasNext: function() {
-            return idx < array.length;
+        hasNext: function () {
+            return idx < array.length - 1;
         },
         hasPervious: function () {
             return idx > 0;
         },
-        idx: function(newIdx) {
+        idx: function (newIdx) {
             if (typeof newIdx !== "undefined")
                 idx = newIdx;
             return idx;
@@ -752,9 +812,9 @@ function pointer(array) {
     };
 }
 
-Object.size = function(obj) {
-	var size = 0, key;
-	for (key in obj) {
+Object.size = function (obj) {
+    var size = 0, key;
+    for (key in obj) {
         if (obj.hasOwnProperty(key)) size++;
     }
     return size;
