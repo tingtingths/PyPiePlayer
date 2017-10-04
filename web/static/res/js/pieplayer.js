@@ -420,6 +420,7 @@ function buildPlaylistAndPlay(artist, album, track_id) {
     } else { // shuffle all
         shuffle = true;
         playlist = Object.values(tracks);
+        document.getElementById("shuffleBtn").setAttribute("style", "");
     }
 
     playlist = groupByArtistAndSortTrack(playlist);
