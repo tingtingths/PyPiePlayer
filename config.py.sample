@@ -6,3 +6,4 @@ pkey_file = ""
 library_path = ""
 PORT = 4343
 DEBUG = False
+x_accel_enabled = True  # whether to delegate stream request to nginx

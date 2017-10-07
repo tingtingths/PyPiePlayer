@@ -8,7 +8,7 @@ from web.controller import setup_web_controller
 
 suffix = "__init__.py"
 lib = Library(library_path)  # scan directory
-setup_web_controller(lib)
+setup_web_controller(lib, x_accel_enabled)
 
 
 @app.route("/")
