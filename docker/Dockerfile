@@ -12,7 +12,7 @@ RUN apk add --update --no-cache \
 
 RUN pip3 --no-cache-dir install uwsgi
 
-RUN mkdir -p /opt \
+RUN mkdir -p /opt /sockets \
     && cd /opt \
     && wget https://github.com/tingtingths/PyPiePlayer/archive/master.zip \
     && unzip master.zip \

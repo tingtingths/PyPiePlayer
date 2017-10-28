@@ -1,9 +1,14 @@
 #!/bin/bash
 
-PORT=5000
-LIBRARY=/home/ting/Music
+LIBRARY=/volume1/music
+
+workdir=/srv/docker/pieplayer
+
+mkdir -p $workdir/sockets \
+	$workdir/log
 
 docker run --name pieplayer -d \
-    -p $PORT:8000 \
     -v $LIBRARY:/music:ro \
+	-v $workdir/sockets:/sockets \
+	-v $workdir:/log:/log \
     tingtingths/pypieplayer:$(cat VERSION)

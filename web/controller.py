@@ -44,7 +44,7 @@ class PlayerController:
 
         if self.x_accel_enabled:
             prefix = os.path.commonprefix([self.lib.library_path, track.get_path()])
-            path = "/pie/stream" + track.get_path()[len(prefix):]
+            path = "/stream" + track.get_path()[len(prefix):]
 
             resp = flask.make_response()
             resp.headers["Content-Type"] = track.get_mimetype()
