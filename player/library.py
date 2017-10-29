@@ -21,7 +21,7 @@ class Library:
         self.wm = None
         self.notifier = None
 
-        self.setup_library()
+        self.setup_library(ignore_json=True)  # TODO: fix watchdog
         self.setup_watchdog()
 
     def setup_library(self, ignore_json=False):
