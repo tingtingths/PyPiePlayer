@@ -26,5 +26,4 @@ COPY conf/* /opt/app/
 
 EXPOSE 8000
 
-CMD /usr/local/bin/uwsgi --ini /opt/app/pie.ini --logto /log/pie.log --wsgi-disable-file-wrapper
-ENTRYPOINT /usr/local/bin/uwsgi --ini /opt/app/pie.ini --logto /log/pie.log --wsgi-disable-file-wrapper
+CMD ["/usr/local/bin/uwsgi", "--ini", "/opt/app/pie.ini", "--wsgi-disable-file-wrapper"]
