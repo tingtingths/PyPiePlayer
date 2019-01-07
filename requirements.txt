@@ -1,4 +1,4 @@
-Flask==0.12.2
+Flask>=0.12.3
 mutagen==1.37
 pyinotify==0.9.6
 Pillow==4.1.1
